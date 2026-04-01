@@ -153,6 +153,30 @@ src/dom.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/browser.dir/build.make CMakeFiles/browser.dir/src/dom.cpp.s
 .PHONY : src/dom.cpp.s
 
+src/layout.o: src/layout.cpp.o
+.PHONY : src/layout.o
+
+# target to build an object file
+src/layout.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/browser.dir/build.make CMakeFiles/browser.dir/src/layout.cpp.o
+.PHONY : src/layout.cpp.o
+
+src/layout.i: src/layout.cpp.i
+.PHONY : src/layout.i
+
+# target to preprocess a source file
+src/layout.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/browser.dir/build.make CMakeFiles/browser.dir/src/layout.cpp.i
+.PHONY : src/layout.cpp.i
+
+src/layout.s: src/layout.cpp.s
+.PHONY : src/layout.s
+
+# target to generate assembly for a file
+src/layout.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/browser.dir/build.make CMakeFiles/browser.dir/src/layout.cpp.s
+.PHONY : src/layout.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -261,6 +285,9 @@ help:
 	@echo "... src/dom.o"
 	@echo "... src/dom.i"
 	@echo "... src/dom.s"
+	@echo "... src/layout.o"
+	@echo "... src/layout.i"
+	@echo "... src/layout.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

@@ -1,15 +1,22 @@
+#pragma once
+
+#include <map>
 #include <string>
 #include <vector>
-#include <variant>
-#include <map> 
 
-enum class NodeType {FlexV, FlexH, Text, Image};
+enum class NodeType { FlexV, FlexH, Text, Image };
 
-struct Node{
-    int id; // unique id for lua interop
+struct Node {
+    int id;
     NodeType type;
     std::map<std::string, std::string> attrs;
     std::string content;
     std::vector<Node*> children;
-    float x, y, width, height; // geometric bounds to be calculated by the layout engine
+    float x{};
+    float y{};
+    float width{};
+    float height{};
 };
+
+Node* parseMarkup(const std::string& source);
+void destroyDom(Node* root);

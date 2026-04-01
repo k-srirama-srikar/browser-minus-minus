@@ -11,12 +11,13 @@ find_package(CURL REQUIRED)
 find_package(Lua 5.4 REQUIRED)
 
 # Include external and local headers
-include_directories(include external/nlohmann/include/single_include external/sol2/include)
+include_directories(include external/nlohmann/include/single_include external/sol2/include ${LUA_INCLUDE_DIR} ${CURL_INCLUDE_DIR})
 
 # Source files
 set(SOURCES 
     src/main.cpp 
     src/dom.cpp 
+    src/layout.cpp 
     src/renderer.cpp 
     src/scripting.cpp
     src/network.cpp
@@ -27,7 +28,7 @@ add_executable(browser ${SOURCES})
 # Linking
 target_link_libraries(browser 
     SDL3::SDL3 
-    ${LUA_LIBRARIES} 
-    ${CURL_LIBRARIES}
+    ${LUA_LIBRARY} 
+    ${CURL_LIBRARY_RELEASE}
     pthread
 )

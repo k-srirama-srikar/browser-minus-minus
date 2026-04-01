@@ -100,10 +100,24 @@ CMakeFiles/browser.dir/src/dom.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/browser.dir/src/dom.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/dom.cpp -o CMakeFiles/browser.dir/src/dom.cpp.s
 
+CMakeFiles/browser.dir/src/layout.cpp.o: CMakeFiles/browser.dir/flags.make
+CMakeFiles/browser.dir/src/layout.cpp.o: /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/layout.cpp
+CMakeFiles/browser.dir/src/layout.cpp.o: CMakeFiles/browser.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/browser.dir/src/layout.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/browser.dir/src/layout.cpp.o -MF CMakeFiles/browser.dir/src/layout.cpp.o.d -o CMakeFiles/browser.dir/src/layout.cpp.o -c /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/layout.cpp
+
+CMakeFiles/browser.dir/src/layout.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/browser.dir/src/layout.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/layout.cpp > CMakeFiles/browser.dir/src/layout.cpp.i
+
+CMakeFiles/browser.dir/src/layout.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/browser.dir/src/layout.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/layout.cpp -o CMakeFiles/browser.dir/src/layout.cpp.s
+
 CMakeFiles/browser.dir/src/renderer.cpp.o: CMakeFiles/browser.dir/flags.make
 CMakeFiles/browser.dir/src/renderer.cpp.o: /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/renderer.cpp
 CMakeFiles/browser.dir/src/renderer.cpp.o: CMakeFiles/browser.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/browser.dir/src/renderer.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/browser.dir/src/renderer.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/browser.dir/src/renderer.cpp.o -MF CMakeFiles/browser.dir/src/renderer.cpp.o.d -o CMakeFiles/browser.dir/src/renderer.cpp.o -c /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/renderer.cpp
 
 CMakeFiles/browser.dir/src/renderer.cpp.i: cmake_force
@@ -117,7 +131,7 @@ CMakeFiles/browser.dir/src/renderer.cpp.s: cmake_force
 CMakeFiles/browser.dir/src/scripting.cpp.o: CMakeFiles/browser.dir/flags.make
 CMakeFiles/browser.dir/src/scripting.cpp.o: /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/scripting.cpp
 CMakeFiles/browser.dir/src/scripting.cpp.o: CMakeFiles/browser.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/browser.dir/src/scripting.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/browser.dir/src/scripting.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/browser.dir/src/scripting.cpp.o -MF CMakeFiles/browser.dir/src/scripting.cpp.o.d -o CMakeFiles/browser.dir/src/scripting.cpp.o -c /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/scripting.cpp
 
 CMakeFiles/browser.dir/src/scripting.cpp.i: cmake_force
@@ -131,7 +145,7 @@ CMakeFiles/browser.dir/src/scripting.cpp.s: cmake_force
 CMakeFiles/browser.dir/src/network.cpp.o: CMakeFiles/browser.dir/flags.make
 CMakeFiles/browser.dir/src/network.cpp.o: /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/network.cpp
 CMakeFiles/browser.dir/src/network.cpp.o: CMakeFiles/browser.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/browser.dir/src/network.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/browser.dir/src/network.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/browser.dir/src/network.cpp.o -MF CMakeFiles/browser.dir/src/network.cpp.o.d -o CMakeFiles/browser.dir/src/network.cpp.o -c /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/network.cpp
 
 CMakeFiles/browser.dir/src/network.cpp.i: cmake_force
@@ -146,6 +160,7 @@ CMakeFiles/browser.dir/src/network.cpp.s: cmake_force
 browser_OBJECTS = \
 "CMakeFiles/browser.dir/src/main.cpp.o" \
 "CMakeFiles/browser.dir/src/dom.cpp.o" \
+"CMakeFiles/browser.dir/src/layout.cpp.o" \
 "CMakeFiles/browser.dir/src/renderer.cpp.o" \
 "CMakeFiles/browser.dir/src/scripting.cpp.o" \
 "CMakeFiles/browser.dir/src/network.cpp.o"
@@ -155,6 +170,7 @@ browser_EXTERNAL_OBJECTS =
 
 browser: CMakeFiles/browser.dir/src/main.cpp.o
 browser: CMakeFiles/browser.dir/src/dom.cpp.o
+browser: CMakeFiles/browser.dir/src/layout.cpp.o
 browser: CMakeFiles/browser.dir/src/renderer.cpp.o
 browser: CMakeFiles/browser.dir/src/scripting.cpp.o
 browser: CMakeFiles/browser.dir/src/network.cpp.o
@@ -162,10 +178,9 @@ browser: CMakeFiles/browser.dir/build.make
 browser: CMakeFiles/browser.dir/compiler_depend.ts
 browser: /usr/lib/x86_64-linux-gnu/libSDL3.so.0.2.10
 browser: /usr/lib/x86_64-linux-gnu/liblua5.4.so
-browser: /usr/lib/x86_64-linux-gnu/libm.so
 browser: /usr/lib/x86_64-linux-gnu/libcurl.so
 browser: CMakeFiles/browser.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable browser"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable browser"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/browser.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

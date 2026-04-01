@@ -2,6 +2,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/browser.dir/link.d"
   "CMakeFiles/browser.dir/src/dom.cpp.o"
   "CMakeFiles/browser.dir/src/dom.cpp.o.d"
+  "CMakeFiles/browser.dir/src/layout.cpp.o"
+  "CMakeFiles/browser.dir/src/layout.cpp.o.d"
   "CMakeFiles/browser.dir/src/main.cpp.o"
   "CMakeFiles/browser.dir/src/main.cpp.o.d"
   "CMakeFiles/browser.dir/src/network.cpp.o"
