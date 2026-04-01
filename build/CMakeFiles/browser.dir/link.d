@@ -12,6 +12,8 @@ browser: \
   /usr/lib/x86_64-linux-gnu/liblua5.4.so \
   /usr/lib/x86_64-linux-gnu/libcurl.so \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/libpthread.a \
+  /usr/lib/x86_64-linux-gnu/libSDL3_ttf.so \
+  /usr/lib/x86_64-linux-gnu/libSDL3.so \
   /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/libm.so \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/libm.so \
@@ -70,6 +72,8 @@ browser: \
   /lib/x86_64-linux-gnu/libzstd.so.1 \
   /lib/x86_64-linux-gnu/libbrotlidec.so.1 \
   /lib/x86_64-linux-gnu/libz.so.1 \
+  /lib/x86_64-linux-gnu/libharfbuzz.so.0 \
+  /lib/x86_64-linux-gnu/libfreetype.so.6 \
   /lib64/ld-linux-x86-64.so.2 \
   /lib/x86_64-linux-gnu/libxcb.so.1 \
   /lib/x86_64-linux-gnu/libXrender.so.1 \
@@ -89,6 +93,10 @@ browser: \
   /lib/x86_64-linux-gnu/libkrb5support.so.0 \
   /lib/x86_64-linux-gnu/libsasl2.so.2 \
   /lib/x86_64-linux-gnu/libbrotlicommon.so.1 \
+  /lib/x86_64-linux-gnu/libglib-2.0.so.0 \
+  /lib/x86_64-linux-gnu/libgraphite2.so.3 \
+  /lib/x86_64-linux-gnu/libbz2.so.1.0 \
+  /lib/x86_64-linux-gnu/libpng16.so.16 \
   /lib/x86_64-linux-gnu/libXau.so.6 \
   /lib/x86_64-linux-gnu/libXdmcp.so.6 \
   /lib/x86_64-linux-gnu/libsndfile.so.1 \
@@ -100,6 +108,8 @@ browser: \
   /lib/x86_64-linux-gnu/libtasn1.so.6 \
   /lib/x86_64-linux-gnu/libkeyutils.so.1 \
   /lib/x86_64-linux-gnu/libresolv.so.2 \
+  /lib/x86_64-linux-gnu/libatomic.so.1 \
+  /lib/x86_64-linux-gnu/libpcre2-8.so.0 \
   /lib/x86_64-linux-gnu/libFLAC.so.14 \
   /lib/x86_64-linux-gnu/libvorbis.so.0 \
   /lib/x86_64-linux-gnu/libvorbisenc.so.2 \
@@ -134,6 +144,10 @@ CMakeFiles/browser.dir/src/network.cpp.o:
 /usr/lib/x86_64-linux-gnu/libcurl.so:
 
 /usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/libpthread.a:
+
+/usr/lib/x86_64-linux-gnu/libSDL3_ttf.so:
+
+/usr/lib/x86_64-linux-gnu/libSDL3.so:
 
 /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so:
 
@@ -251,6 +265,10 @@ CMakeFiles/browser.dir/src/network.cpp.o:
 
 /lib/x86_64-linux-gnu/libz.so.1:
 
+/lib/x86_64-linux-gnu/libharfbuzz.so.0:
+
+/lib/x86_64-linux-gnu/libfreetype.so.6:
+
 /lib64/ld-linux-x86-64.so.2:
 
 /lib/x86_64-linux-gnu/libxcb.so.1:
@@ -289,6 +307,14 @@ CMakeFiles/browser.dir/src/network.cpp.o:
 
 /lib/x86_64-linux-gnu/libbrotlicommon.so.1:
 
+/lib/x86_64-linux-gnu/libglib-2.0.so.0:
+
+/lib/x86_64-linux-gnu/libgraphite2.so.3:
+
+/lib/x86_64-linux-gnu/libbz2.so.1.0:
+
+/lib/x86_64-linux-gnu/libpng16.so.16:
+
 /lib/x86_64-linux-gnu/libXau.so.6:
 
 /lib/x86_64-linux-gnu/libXdmcp.so.6:
@@ -310,6 +336,10 @@ CMakeFiles/browser.dir/src/network.cpp.o:
 /lib/x86_64-linux-gnu/libkeyutils.so.1:
 
 /lib/x86_64-linux-gnu/libresolv.so.2:
+
+/lib/x86_64-linux-gnu/libatomic.so.1:
+
+/lib/x86_64-linux-gnu/libpcre2-8.so.0:
 
 /lib/x86_64-linux-gnu/libFLAC.so.14:
 

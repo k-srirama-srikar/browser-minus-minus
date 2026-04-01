@@ -320,4 +320,4 @@ CMakeFiles/browser.dir/src/renderer.cpp.o: \
  /usr/include/c++/14/ranges /usr/include/c++/14/bits/elements_of.h \
  /usr/include/c++/14/numeric /usr/include/c++/14/bits/stl_numeric.h \
  /usr/include/c++/14/pstl/glue_numeric_defs.h /usr/include/c++/14/any \
- /usr/include/c++/14/iostream
+ /usr/include/c++/14/iostream /usr/include/SDL3_ttf/SDL_ttf.h

@@ -2,9 +2,11 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <SDL3_ttf/SDL_ttf.h>
 
 static SDL_Window* g_window = nullptr;
 static SDL_Renderer* g_renderer = nullptr;
+static TTF_Font* g_font = nullptr;
 
 bool initRenderer(SDL_Window** window, SDL_Renderer** renderer) {
     if (getenv("DISPLAY") == nullptr && getenv("WAYLAND_DISPLAY") == nullptr) {
@@ -14,6 +16,11 @@ bool initRenderer(SDL_Window** window, SDL_Renderer** renderer) {
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
+        return false;
+    }
+    
+    if (!TTF_Init()) {
+        std::cerr << "TTF_Init Error: " << SDL_GetError() << std::endl;
         return false;
     }
 
@@ -32,12 +39,21 @@ bool initRenderer(SDL_Window** window, SDL_Renderer** renderer) {
         return false;
     }
 
+    g_font = TTF_OpenFont("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 16.0f);
+    if (!g_font) {
+        std::cerr << "Warning: Failed to load DejaVuSans.ttf: " << SDL_GetError() << std::endl;
+    }
+
     *window = g_window;
     *renderer = g_renderer;
     return true;
 }
 
 void shutdownRenderer() {
+    if (g_font) {
+        TTF_CloseFont(g_font);
+        g_font = nullptr;
+    }
     if (g_renderer) {
         SDL_DestroyRenderer(g_renderer);
         g_renderer = nullptr;
@@ -46,6 +62,7 @@ void shutdownRenderer() {
         SDL_DestroyWindow(g_window);
         g_window = nullptr;
     }
+    TTF_Quit();
     SDL_Quit();
 }
 
@@ -64,24 +81,22 @@ static void drawRectangle(SDL_Renderer* renderer, const Node* node, SDL_Color co
 }
 
 static void drawText(SDL_Renderer* renderer, const std::string& text, int x, int y, SDL_Color color) {
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-    const int dotWidth = 3;
-    const int dotHeight = 3;
-    const int spacing = 4;
-    int cursor = x;
-    for (unsigned char ch : text) {
-        uint8_t pattern = ch;
-        for (int bit = 0; bit < 8; ++bit) {
-            if ((pattern >> bit) & 1u) {
-                        SDL_FRect dot;
-                dot.x = static_cast<float>(cursor + (bit % 4) * dotWidth);
-                dot.y = static_cast<float>(y + (bit / 4) * dotHeight);
-                dot.w = static_cast<float>(dotWidth);
-                dot.h = static_cast<float>(dotHeight);
-                SDL_RenderFillRect(renderer, &dot);
-            }
+    if (text.empty()) return;
+    
+    if (!g_font) {
+        // Fallback or silently drop text if no font loaded
+        return;
+    }
+
+    SDL_Surface* surface = TTF_RenderText_Blended(g_font, text.c_str(), text.length(), color);
+    if (surface) {
+        SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+        if (texture) {
+            SDL_FRect dest = { static_cast<float>(x), static_cast<float>(y), static_cast<float>(surface->w), static_cast<float>(surface->h) };
+            SDL_RenderTexture(renderer, texture, nullptr, &dest);
+            SDL_DestroyTexture(texture);
         }
-        cursor += dotWidth * 4 + spacing;
+        SDL_DestroySurface(surface);
     }
 }
 
@@ -96,7 +111,6 @@ static std::string getNodeText(const Node* node) {
 
 static void renderNode(SDL_Renderer* renderer, const Node* node) {
     if (node->type == NodeType::Root) {
-        // Draw deep background
         SDL_SetRenderDrawColor(renderer, 24, 26, 32, 255);
         SDL_RenderClear(renderer);
     } else if (node->type == NodeType::FlexV || node->type == NodeType::FlexH) {

@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/include -I/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/external/nlohmann/include/single_include -I/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/external/sol2/include -I/usr/include/lua5.4
+CXX_INCLUDES = -I/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/include -I/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/external/nlohmann/include/single_include -I/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/external/sol2/include -I/usr/include/lua5.4 -isystem /usr/include/pipewire-0.3 -isystem /usr/include/spa-0.2 -isystem /usr/include/libdrm -isystem /usr/include/libdecor-0 -isystem /usr/include/harfbuzz -isystem /usr/include/freetype2 -isystem /usr/include/libpng16 -isystem /usr/include/glib-2.0 -isystem /usr/lib/x86_64-linux-gnu/glib-2.0/include -isystem /usr/include/sysprof-6
 
-CXX_FLAGS = -std=gnu++23
+CXX_FLAGS = -std=gnu++23 -D_REENTRANT -pthread
 

@@ -701,6 +701,12 @@ pkgcfg_lib_PC_WAYLAND_wayland-egl:FILEPATH=/usr/lib/x86_64-linux-gnu/libwayland-
 //Path to a library.
 pkgcfg_lib_PC_WAYLAND_xkbcommon:FILEPATH=/usr/lib/x86_64-linux-gnu/libxkbcommon.so
 
+//Path to a library.
+pkgcfg_lib_SDL3_ttf_SDL3:FILEPATH=/usr/lib/x86_64-linux-gnu/libSDL3.so
+
+//Path to a library.
+pkgcfg_lib_SDL3_ttf_SDL3_ttf:FILEPATH=/usr/lib/x86_64-linux-gnu/libSDL3_ttf.so
+
 
 ########################
 # INTERNAL cache entries
@@ -1194,6 +1200,41 @@ PC_WAYLAND_xkbcommon_VERSION:INTERNAL=1.7.0
 PKG_CONFIG_ARGN-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: PKG_CONFIG_EXECUTABLE
 PKG_CONFIG_EXECUTABLE-ADVANCED:INTERNAL=1
+SDL3_ttf_CFLAGS:INTERNAL=-I/usr/include;-I/usr/include/pipewire-0.3;-I/usr/include/spa-0.2;-D_REENTRANT;-I/usr/include/libdrm;-I/usr/include/libdecor-0;-I/usr/include/harfbuzz;-I/usr/include/freetype2;-I/usr/include/libpng16;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include;-I/usr/include/sysprof-6;-pthread
+SDL3_ttf_CFLAGS_I:INTERNAL=
+SDL3_ttf_CFLAGS_OTHER:INTERNAL=-D_REENTRANT;-pthread
+SDL3_ttf_FOUND:INTERNAL=1
+SDL3_ttf_INCLUDEDIR:INTERNAL=/usr/include
+SDL3_ttf_INCLUDE_DIRS:INTERNAL=/usr/include;/usr/include/pipewire-0.3;/usr/include/spa-0.2;/usr/include/libdrm;/usr/include/libdecor-0;/usr/include/harfbuzz;/usr/include/freetype2;/usr/include/libpng16;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include;/usr/include/sysprof-6
+SDL3_ttf_LDFLAGS:INTERNAL=-L/usr/lib/x86_64-linux-gnu;-lSDL3_ttf;-lSDL3
+SDL3_ttf_LDFLAGS_OTHER:INTERNAL=
+SDL3_ttf_LIBDIR:INTERNAL=/usr/lib/x86_64-linux-gnu
+SDL3_ttf_LIBRARIES:INTERNAL=SDL3_ttf;SDL3
+SDL3_ttf_LIBRARY_DIRS:INTERNAL=/usr/lib/x86_64-linux-gnu
+SDL3_ttf_LIBS:INTERNAL=
+SDL3_ttf_LIBS_L:INTERNAL=
+SDL3_ttf_LIBS_OTHER:INTERNAL=
+SDL3_ttf_LIBS_PATHS:INTERNAL=
+SDL3_ttf_MODULE_NAME:INTERNAL=sdl3-ttf
+SDL3_ttf_PREFIX:INTERNAL=/usr
+SDL3_ttf_STATIC_CFLAGS:INTERNAL=-I/usr/include;-I/usr/include/pipewire-0.3;-I/usr/include/spa-0.2;-D_REENTRANT;-I/usr/include/libdrm;-I/usr/include/libdecor-0;-I/usr/include/harfbuzz;-I/usr/include/freetype2;-I/usr/include/libpng16;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include;-I/usr/include/sysprof-6;-pthread
+SDL3_ttf_STATIC_CFLAGS_I:INTERNAL=
+SDL3_ttf_STATIC_CFLAGS_OTHER:INTERNAL=-D_REENTRANT;-pthread
+SDL3_ttf_STATIC_INCLUDE_DIRS:INTERNAL=/usr/include;/usr/include/pipewire-0.3;/usr/include/spa-0.2;/usr/include/libdrm;/usr/include/libdecor-0;/usr/include/harfbuzz;/usr/include/freetype2;/usr/include/libpng16;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include;/usr/include/sysprof-6
+SDL3_ttf_STATIC_LDFLAGS:INTERNAL=-L/usr/lib/x86_64-linux-gnu;-lSDL3_ttf;-lSDL3;-lm;-L/usr/lib/x86_64-linux-gnu;-lasound;-lm;-lpthread;-lrt;-lpipewire-0.3;-lpulse;-pthread;-L/usr/lib/x86_64-linux-gnu/pulseaudio;-lpulsecommon-17.0;-lsndio;-lX11;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-L/usr/lib/x86_64-linux-gnu;-lX11;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-lXcursor;-L/usr/lib/x86_64-linux-gnu;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-lX11;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-L/usr/lib/x86_64-linux-gnu;-lX11;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-L/usr/lib/x86_64-linux-gnu;-lX11;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-lXi;-L/usr/lib/x86_64-linux-gnu;-lX11;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-L/usr/lib/x86_64-linux-gnu;-lX11;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-L/usr/lib/x86_64-linux-gnu;-lX11;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-lXfixes;-L/usr/lib/x86_64-linux-gnu;-lX11;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-lXrandr;-L/usr/lib/x86_64-linux-gnu;-lX11;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-L/usr/lib/x86_64-linux-gnu;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-lXrender;-lX11;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-L/usr/lib/x86_64-linux-gnu;-lX11;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-lXss;-L/usr/lib/x86_64-linux-gnu;-lX11;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-lXext;-L/usr/lib/x86_64-linux-gnu;-lX11;-lpthread;-L/usr/lib/x86_64-linux-gnu;-lxcb;-L/usr/lib/x86_64-linux-gnu;-lXau;-lXdmcp;-ldrm;-lgbm;-lm;-pthread;-lrt;-lffi;-lwayland-egl;-lwayland-client;-lm;-pthread;-lrt;-lffi;-lwayland-cursor;-L/usr/lib/x86_64-linux-gnu;-lwayland-client;-lm;-pthread;-lrt;-lffi;-lEGL;-lxkbcommon;-ldecor-0;-L/usr/lib/x86_64-linux-gnu;-lwayland-client;-lm;-pthread;-lrt;-lffi;-L/usr/lib/x86_64-linux-gnu;-lharfbuzz;-pthread;-lm;-L/usr/lib/x86_64-linux-gnu;-L/usr/lib/x86_64-linux-gnu;-L/usr/lib/x86_64-linux-gnu;-lz;-L/usr/lib;-lz;-lm;-L/usr/lib/x86_64-linux-gnu;-L/usr/lib/x86_64-linux-gnu;-lz;-L/usr/lib/x86_64-linux-gnu;-lbrotlicommon;-lglib-2.0;-latomic;-lm;-pthread;-L/usr/lib/x86_64-linux-gnu;-lsysprof-capture-4;-pthread;-lpcre2-8;-lgraphite2;-lfreetype;-L/usr/lib/x86_64-linux-gnu;-L/usr/lib/x86_64-linux-gnu;-lz;-lbz2;-lpng16;-lz;-lm;-L/usr/lib/x86_64-linux-gnu;-L/usr/lib/x86_64-linux-gnu;-lz;-lbrotlidec;-L/usr/lib/x86_64-linux-gnu;-lbrotlicommon
+SDL3_ttf_STATIC_LDFLAGS_OTHER:INTERNAL=-pthread;-pthread;-pthread;-pthread;-pthread;-pthread;-pthread;-pthread
+SDL3_ttf_STATIC_LIBDIR:INTERNAL=
+SDL3_ttf_STATIC_LIBRARIES:INTERNAL=SDL3_ttf;SDL3;m;asound;m;pthread;rt;pipewire-0.3;pulse;pulsecommon-17.0;sndio;X11;pthread;xcb;Xau;X11;pthread;xcb;Xau;Xcursor;pthread;xcb;Xau;X11;pthread;xcb;Xau;X11;pthread;xcb;Xau;X11;pthread;xcb;Xau;Xi;X11;pthread;xcb;Xau;X11;pthread;xcb;Xau;X11;pthread;xcb;Xau;Xfixes;X11;pthread;xcb;Xau;Xrandr;X11;pthread;xcb;Xau;pthread;xcb;Xau;Xrender;X11;pthread;xcb;Xau;X11;pthread;xcb;Xau;Xss;X11;pthread;xcb;Xau;Xext;X11;pthread;xcb;Xau;Xdmcp;drm;gbm;m;rt;ffi;wayland-egl;wayland-client;m;rt;ffi;wayland-cursor;wayland-client;m;rt;ffi;EGL;xkbcommon;decor-0;wayland-client;m;rt;ffi;harfbuzz;m;z;z;m;z;brotlicommon;glib-2.0;atomic;m;sysprof-capture-4;pcre2-8;graphite2;freetype;z;bz2;png16;z;m;z;brotlidec;brotlicommon
+SDL3_ttf_STATIC_LIBRARY_DIRS:INTERNAL=/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu/pulseaudio;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu
+SDL3_ttf_STATIC_LIBS:INTERNAL=
+SDL3_ttf_STATIC_LIBS_L:INTERNAL=
+SDL3_ttf_STATIC_LIBS_OTHER:INTERNAL=
+SDL3_ttf_STATIC_LIBS_PATHS:INTERNAL=
+SDL3_ttf_VERSION:INTERNAL=3.2.2
+SDL3_ttf_sdl3-ttf_INCLUDEDIR:INTERNAL=
+SDL3_ttf_sdl3-ttf_LIBDIR:INTERNAL=
+SDL3_ttf_sdl3-ttf_PREFIX:INTERNAL=
+SDL3_ttf_sdl3-ttf_VERSION:INTERNAL=
 //ADVANCED property for variable: X11_ICE_INCLUDE_PATH
 X11_ICE_INCLUDE_PATH-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: X11_ICE_LIB
@@ -1478,6 +1519,7 @@ __pkg_config_arguments_PC_PIPEWIRE:INTERNAL=QUIET;IMPORTED_TARGET;libpipewire-0.
 __pkg_config_arguments_PC_PULSEAUDIO:INTERNAL=QUIET;IMPORTED_TARGET;libpulse>=0.9.15
 __pkg_config_arguments_PC_SNDIO:INTERNAL=QUIET;IMPORTED_TARGET;sndio
 __pkg_config_arguments_PC_WAYLAND:INTERNAL=QUIET;IMPORTED_TARGET;wayland-client>=1.18;wayland-egl;wayland-cursor;egl;xkbcommon>=0.5.0
+__pkg_config_arguments_SDL3_ttf:INTERNAL=REQUIRED;IMPORTED_TARGET;sdl3-ttf
 __pkg_config_checked_PC_CURL:INTERNAL=1
 __pkg_config_checked_PC_GBM:INTERNAL=1
 __pkg_config_checked_PC_LIBDECOR:INTERNAL=1
@@ -1486,6 +1528,7 @@ __pkg_config_checked_PC_PIPEWIRE:INTERNAL=1
 __pkg_config_checked_PC_PULSEAUDIO:INTERNAL=1
 __pkg_config_checked_PC_SNDIO:INTERNAL=1
 __pkg_config_checked_PC_WAYLAND:INTERNAL=1
+__pkg_config_checked_SDL3_ttf:INTERNAL=1
 //ADVANCED property for variable: pkgcfg_lib_PC_CURL_curl
 pkgcfg_lib_PC_CURL_curl-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: pkgcfg_lib_PC_GBM_gbm
@@ -1510,5 +1553,9 @@ pkgcfg_lib_PC_WAYLAND_wayland-cursor-ADVANCED:INTERNAL=1
 pkgcfg_lib_PC_WAYLAND_wayland-egl-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: pkgcfg_lib_PC_WAYLAND_xkbcommon
 pkgcfg_lib_PC_WAYLAND_xkbcommon-ADVANCED:INTERNAL=1
-prefix_result:INTERNAL=alt-svc;AsynchDNS;brotli;GSS-API;HSTS;HTTP2;HTTP3;HTTPS-proxy;IDN;IPv6;Kerberos;Largefile;libz;NTLM;PSL;SPNEGO;SSL;threadsafe;TLS-SRP;UnixSockets;zstd
+//ADVANCED property for variable: pkgcfg_lib_SDL3_ttf_SDL3
+pkgcfg_lib_SDL3_ttf_SDL3-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_SDL3_ttf_SDL3_ttf
+pkgcfg_lib_SDL3_ttf_SDL3_ttf-ADVANCED:INTERNAL=1
+prefix_result:INTERNAL=/usr/lib/x86_64-linux-gnu
 

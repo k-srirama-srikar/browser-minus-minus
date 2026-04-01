@@ -179,6 +179,8 @@ browser: CMakeFiles/browser.dir/compiler_depend.ts
 browser: /usr/lib/x86_64-linux-gnu/libSDL3.so.0.2.10
 browser: /usr/lib/x86_64-linux-gnu/liblua5.4.so
 browser: /usr/lib/x86_64-linux-gnu/libcurl.so
+browser: /usr/lib/x86_64-linux-gnu/libSDL3_ttf.so
+browser: /usr/lib/x86_64-linux-gnu/libSDL3.so
 browser: CMakeFiles/browser.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable browser"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/browser.dir/link.txt --verbose=$(VERBOSE)
