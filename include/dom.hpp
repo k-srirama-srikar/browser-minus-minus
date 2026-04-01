@@ -1,17 +1,22 @@
 #pragma once
 
-#include <map>
 #include <string>
 #include <vector>
+#include <nlohmann/json.hpp>
 
-enum class NodeType { FlexV, FlexH, Text, Image };
+enum class NodeType { Root, FlexV, FlexH, Text, Image };
 
 struct Node {
     int id;
     NodeType type;
-    std::map<std::string, std::string> attrs;
-    std::string content;
+    std::string tag;
+    
+    // Extensible JSON property bag for styling, text content, alt-text, etc.
+    nlohmann::json properties;
+    
     std::vector<Node*> children;
+    
+    // Computed layout constraints
     float x{};
     float y{};
     float width{};

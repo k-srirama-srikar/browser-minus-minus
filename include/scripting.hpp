@@ -7,3 +7,4 @@ struct Node;
 bool initScripting(Node* documentRoot);
 void shutdownScripting();
 void runScript(const std::string& code);
+void triggerScriptClick(int id);

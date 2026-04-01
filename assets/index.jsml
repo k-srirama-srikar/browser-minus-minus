@@ -1,0 +1,27 @@
+{
+  "lua": "assets/script.lua",
+  "root": {
+    "flexv": [
+      {
+        "text": {
+          "content": "Click me to increment counter!",
+          "fontsize": 24,
+          "color": "#ffffff"
+        },
+        "tag" : "counter",
+        "bgcolor": "#ff4444",
+        "spacing": 10
+      },
+      {
+        "text": {
+          "content": "Welcome to the JSML Browser. Click the red button above.",
+          "fontsize": 16,
+          "color": "#cccccc"
+        },
+        "tag" : "info",
+        "bgcolor": "#222233",
+        "spacing": 20
+      }
+    ]
+  }
+}

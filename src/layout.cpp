@@ -2,48 +2,22 @@
 #include <algorithm>
 #include <cmath>
 #include <string>
-
-static float parseFloat(const std::string& text, float fallback) {
-    if (text.empty()) {
-        return fallback;
-    }
-    try {
-        return std::stof(text);
-    } catch (...) {
-        return fallback;
-    }
-}
-
-static std::string lowerCase(std::string text) {
-    std::transform(text.begin(), text.end(), text.begin(), [](unsigned char c) {
-        return static_cast<char>(std::tolower(c));
-    });
-    return text;
-}
+#include <iostream>
 
 static float parseStyleFloat(const Node* node, const std::string& key, float fallback) {
-    auto it = node->attrs.find("style");
-    if (it == node->attrs.end()) {
-        return fallback;
+    if (node->properties.contains(key) && node->properties[key].is_number()) {
+        return node->properties[key].get<float>();
     }
+    return fallback;
+}
 
-    std::string style = lowerCase(it->second);
-    size_t found = style.find(key + ":");
-    if (found == std::string::npos) {
-        return fallback;
+static std::string getNodeText(const Node* node) {
+    if (node->properties.contains("text") && node->properties["text"].is_object()) {
+        if (node->properties["text"].contains("content") && node->properties["text"]["content"].is_string()) {
+            return node->properties["text"]["content"].get<std::string>();
+        }
     }
-
-    size_t start = found + key.size() + 1;
-    while (start < style.size() && std::isspace(static_cast<unsigned char>(style[start]))) {
-        start++;
-    }
-
-    size_t end = start;
-    while (end < style.size() && (std::isdigit(static_cast<unsigned char>(style[end])) || style[end] == '.' || style[end] == '-')) {
-        end++;
-    }
-
-    return parseFloat(style.substr(start, end - start), fallback);
+    return "";
 }
 
 static float measureTextWidth(const std::string& text) {
@@ -74,11 +48,20 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
     node->y = y;
     node->width = width;
     node->height = height;
+    
+    // JSML root might just be a shell, let's just lay it out with 0 padding
+    if (node->type == NodeType::Root) {
+        if (!node->children.empty()) {
+            layoutNode(node->children[0], x, y, width, height);
+        }
+        return;
+    }
 
     if (node->type == NodeType::Text) {
-        float effectiveWidth = width > 0.0f ? width : measureTextWidth(node->content);
+        std::string content = getNodeText(node);
+        float effectiveWidth = width > 0.0f ? width : measureTextWidth(content);
         node->width = effectiveWidth;
-        node->height = measureTextHeight(node->content, effectiveWidth);
+        node->height = measureTextHeight(content, effectiveWidth);
         return;
     }
 
@@ -91,7 +74,7 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
     }
 
     float padding = parseStyleFloat(node, "padding", 12.0f);
-    float gap = parseStyleFloat(node, "gap", 8.0f);
+    float gap = parseStyleFloat(node, "spacing", 8.0f);
     float innerX = x + padding;
     float innerY = y + padding;
     float innerWidth = std::max(0.0f, width - padding * 2.0f);
@@ -102,12 +85,13 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
     }
 
     float totalGap = gap * static_cast<float>(count - 1);
+    
     if (node->type == NodeType::FlexV) {
         float fixedHeight = 0.0f;
         int flexCount = 0;
         for (Node* child : node->children) {
             if (child->type == NodeType::Text) {
-                fixedHeight += measureTextHeight(child->content, innerWidth);
+                fixedHeight += measureTextHeight(getNodeText(child), innerWidth);
             } else if (child->type == NodeType::Image) {
                 fixedHeight += parseStyleFloat(child, "height", 140.0f);
             } else {
@@ -122,7 +106,7 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
         for (Node* child : node->children) {
             float childHeight = 0.0f;
             if (child->type == NodeType::Text) {
-                childHeight = measureTextHeight(child->content, innerWidth);
+                childHeight = measureTextHeight(getNodeText(child), innerWidth);
             } else if (child->type == NodeType::Image) {
                 childHeight = parseStyleFloat(child, "height", 140.0f);
             } else {
@@ -139,7 +123,7 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
         int flexCount = 0;
         for (Node* child : node->children) {
             if (child->type == NodeType::Text) {
-                fixedWidth += measureTextWidth(child->content);
+                fixedWidth += measureTextWidth(getNodeText(child));
             } else if (child->type == NodeType::Image) {
                 fixedWidth += parseStyleFloat(child, "width", 240.0f);
             } else {
@@ -154,7 +138,7 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
         for (Node* child : node->children) {
             float childWidth = 0.0f;
             if (child->type == NodeType::Text) {
-                childWidth = std::max(80.0f, measureTextWidth(child->content));
+                childWidth = std::max(80.0f, measureTextWidth(getNodeText(child)));
             } else if (child->type == NodeType::Image) {
                 childWidth = parseStyleFloat(child, "width", 240.0f);
             } else {

@@ -85,8 +85,21 @@ static void drawText(SDL_Renderer* renderer, const std::string& text, int x, int
     }
 }
 
+static std::string getNodeText(const Node* node) {
+    if (node->properties.contains("text") && node->properties["text"].is_object()) {
+        if (node->properties["text"].contains("content") && node->properties["text"]["content"].is_string()) {
+            return node->properties["text"]["content"].get<std::string>();
+        }
+    }
+    return "";
+}
+
 static void renderNode(SDL_Renderer* renderer, const Node* node) {
-    if (node->type == NodeType::FlexV || node->type == NodeType::FlexH) {
+    if (node->type == NodeType::Root) {
+        // Draw deep background
+        SDL_SetRenderDrawColor(renderer, 24, 26, 32, 255);
+        SDL_RenderClear(renderer);
+    } else if (node->type == NodeType::FlexV || node->type == NodeType::FlexH) {
         drawRectangle(renderer, node, {36, 40, 52, 255}, true);
         drawRectangle(renderer, node, {78, 90, 110, 255}, false);
     } else if (node->type == NodeType::Image) {
@@ -95,7 +108,7 @@ static void renderNode(SDL_Renderer* renderer, const Node* node) {
         drawText(renderer, "IMG", static_cast<int>(node->x + 8.0f), static_cast<int>(node->y + 8.0f), {235, 235, 235, 255});
     } else if (node->type == NodeType::Text) {
         drawRectangle(renderer, node, {24, 30, 40, 255}, true);
-        drawText(renderer, node->content, static_cast<int>(node->x + 6.0f), static_cast<int>(node->y + 6.0f), {230, 230, 230, 255});
+        drawText(renderer, getNodeText(node), static_cast<int>(node->x + 6.0f), static_cast<int>(node->y + 6.0f), {230, 230, 230, 255});
     }
 
     for (const Node* child : node->children) {
