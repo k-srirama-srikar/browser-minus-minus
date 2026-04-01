@@ -7,18 +7,26 @@ static SDL_Window* g_window = nullptr;
 static SDL_Renderer* g_renderer = nullptr;
 
 bool initRenderer(SDL_Window** window, SDL_Renderer** renderer) {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    if (getenv("DISPLAY") == nullptr && getenv("WAYLAND_DISPLAY") == nullptr) {
+        std::cerr << "No display detected. Switching to dummy video driver for headless mode." << std::endl;
+        SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "dummy");
+    }
+
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
+        std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
         return false;
     }
 
     g_window = SDL_CreateWindow("Browser++ Toy Browser", 1280, 720, 0);
     if (!g_window) {
+        std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
         SDL_Quit();
         return false;
     }
 
     g_renderer = SDL_CreateRenderer(g_window, nullptr);
     if (!g_renderer) {
+        std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
         SDL_DestroyWindow(g_window);
         SDL_Quit();
         return false;
