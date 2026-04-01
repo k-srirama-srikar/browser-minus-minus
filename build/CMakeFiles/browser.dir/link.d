@@ -38,7 +38,6 @@ browser: \
   /usr/lib/gcc/x86_64-linux-gnu/14/libgcc.a \
   /usr/lib/gcc/x86_64-linux-gnu/14/crtendS.o \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/crtn.o \
-  /lib/x86_64-linux-gnu/libm.so.6 \
   /lib/x86_64-linux-gnu/libasound.so.2 \
   /lib/x86_64-linux-gnu/libX11.so.6 \
   /lib/x86_64-linux-gnu/libXext.so.6 \
@@ -187,8 +186,6 @@ CMakeFiles/browser.dir/src/network.cpp.o:
 /usr/lib/gcc/x86_64-linux-gnu/14/crtendS.o:
 
 /usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/crtn.o:
-
-/lib/x86_64-linux-gnu/libm.so.6:
 
 /lib/x86_64-linux-gnu/libasound.so.2:
 

@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    if (!initScripting()) {
+    if (!initScripting(document)) {
         std::cerr << "Lua scripting initialization failed." << std::endl;
     }
     runScripts(document);
