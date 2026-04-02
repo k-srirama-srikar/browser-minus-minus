@@ -32,10 +32,16 @@ static std::string locateFontPath() {
     if (envFont2 && envFont2[0]) {
         candidates.emplace_back(envFont2);
     }
-    // Local assets first
+
+    // Local assets first (support various working directory cases)
+    candidates.emplace_back("src/assets/DejaVuSans.ttf");
+    candidates.emplace_back("src/assets/LiberationSans-Regular.ttf");
+    candidates.emplace_back("assets/DejaVuSans.ttf");
+    candidates.emplace_back("assets/LiberationSans-Regular.ttf");
     candidates.emplace_back("../src/assets/DejaVuSans.ttf");
     candidates.emplace_back("../src/assets/LiberationSans-Regular.ttf");
-    // System fonts as fallbacks
+
+    // System fonts as fallback
     candidates.emplace_back("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
     candidates.emplace_back("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf");
     candidates.emplace_back("/usr/share/fonts/truetype/freefont/FreeSans.ttf");
@@ -45,9 +51,11 @@ static std::string locateFontPath() {
 
     for (const std::string& candidate : candidates) {
         if (fileExists(candidate)) {
+            std::cout << "Font candidate found: " << candidate << std::endl;
             return candidate;
         }
     }
+    std::cerr << "No font candidate found in search path." << std::endl;
     return std::string();
 }
 
