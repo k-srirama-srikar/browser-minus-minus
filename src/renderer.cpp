@@ -32,6 +32,10 @@ static std::string locateFontPath() {
     if (envFont2 && envFont2[0]) {
         candidates.emplace_back(envFont2);
     }
+    // Local assets first
+    candidates.emplace_back("../src/assets/DejaVuSans.ttf");
+    candidates.emplace_back("../src/assets/LiberationSans-Regular.ttf");
+    // System fonts as fallbacks
     candidates.emplace_back("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
     candidates.emplace_back("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf");
     candidates.emplace_back("/usr/share/fonts/truetype/freefont/FreeSans.ttf");

@@ -1,3 +1,0 @@
-/home/shravani/browser/browser-minus-minus/build/_deps/sdl3_ttf-subbuild/CMakeFiles/sdl3_ttf-populate.dir
-/home/shravani/browser/browser-minus-minus/build/_deps/sdl3_ttf-subbuild/CMakeFiles/edit_cache.dir
-/home/shravani/browser/browser-minus-minus/build/_deps/sdl3_ttf-subbuild/CMakeFiles/rebuild_cache.dir
