@@ -8,6 +8,11 @@ static float parseStyleFloat(const Node* node, const std::string& key, float fal
     if (node->properties.contains(key) && node->properties[key].is_number()) {
         return node->properties[key].get<float>();
     }
+    if (node->properties.contains("text") && node->properties["text"].is_object()) {
+        if (node->properties["text"].contains(key) && node->properties["text"][key].is_number()) {
+            return node->properties["text"][key].get<float>();
+        }
+    }
     return fallback;
 }
 
@@ -20,14 +25,14 @@ static std::string getNodeText(const Node* node) {
     return "";
 }
 
-static float measureTextWidth(const std::string& text) {
-    const float charWidth = 8.0f;
+static float measureTextWidth(const std::string& text, float fontSize) {
+    const float charWidth = std::max(1.0f, fontSize * 0.55f);
     return std::max(0.0f, static_cast<float>(text.size()) * charWidth);
 }
 
-static float measureTextHeight(const std::string& text, float maxWidth) {
-    const float charWidth = 8.0f;
-    const float lineHeight = 18.0f;
+static float measureTextHeight(const std::string& text, float maxWidth, float fontSize) {
+    const float charWidth = std::max(1.0f, fontSize * 0.55f);
+    const float lineHeight = std::max(1.0f, fontSize * 1.25f);
     if (text.empty()) {
         return lineHeight;
     }
@@ -59,9 +64,10 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
 
     if (node->type == NodeType::Text) {
         std::string content = getNodeText(node);
-        float effectiveWidth = width > 0.0f ? width : measureTextWidth(content);
+        float fontSize = parseStyleFloat(node, "fontsize", 16.0f);
+        float effectiveWidth = width > 0.0f ? width : measureTextWidth(content, fontSize);
         node->width = effectiveWidth;
-        node->height = measureTextHeight(content, effectiveWidth);
+        node->height = measureTextHeight(content, effectiveWidth, fontSize);
         return;
     }
 
@@ -91,7 +97,8 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
         int flexCount = 0;
         for (Node* child : node->children) {
             if (child->type == NodeType::Text) {
-                fixedHeight += measureTextHeight(getNodeText(child), innerWidth);
+                float fontSize = parseStyleFloat(child, "fontsize", 16.0f);
+                fixedHeight += measureTextHeight(getNodeText(child), innerWidth, fontSize);
             } else if (child->type == NodeType::Image) {
                 fixedHeight += parseStyleFloat(child, "height", 140.0f);
             } else {
@@ -106,7 +113,8 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
         for (Node* child : node->children) {
             float childHeight = 0.0f;
             if (child->type == NodeType::Text) {
-                childHeight = measureTextHeight(getNodeText(child), innerWidth);
+                float fontSize = parseStyleFloat(child, "fontsize", 16.0f);
+                childHeight = measureTextHeight(getNodeText(child), innerWidth, fontSize);
             } else if (child->type == NodeType::Image) {
                 childHeight = parseStyleFloat(child, "height", 140.0f);
             } else {
@@ -123,7 +131,8 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
         int flexCount = 0;
         for (Node* child : node->children) {
             if (child->type == NodeType::Text) {
-                fixedWidth += measureTextWidth(getNodeText(child));
+                float fontSize = parseStyleFloat(child, "fontsize", 16.0f);
+                fixedWidth += measureTextWidth(getNodeText(child), fontSize);
             } else if (child->type == NodeType::Image) {
                 fixedWidth += parseStyleFloat(child, "width", 240.0f);
             } else {
@@ -138,7 +147,9 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
         for (Node* child : node->children) {
             float childWidth = 0.0f;
             if (child->type == NodeType::Text) {
-                childWidth = std::max(80.0f, measureTextWidth(getNodeText(child)));
+                float fontSize = parseStyleFloat(child, "fontsize", 16.0f);
+                float measured = measureTextWidth(getNodeText(child), fontSize);
+                childWidth = std::max(80.0f, measured);
             } else if (child->type == NodeType::Image) {
                 childWidth = parseStyleFloat(child, "width", 240.0f);
             } else {

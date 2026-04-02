@@ -2,11 +2,15 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <string>
+#include <unordered_map>
 #include <SDL3_ttf/SDL_ttf.h>
 
 static SDL_Window* g_window = nullptr;
 static SDL_Renderer* g_renderer = nullptr;
 static TTF_Font* g_font = nullptr;
+static std::unordered_map<int, TTF_Font*> g_fontCache;
+static const char* g_fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
 
 bool initRenderer(SDL_Window** window, SDL_Renderer** renderer) {
     if (getenv("DISPLAY") == nullptr && getenv("WAYLAND_DISPLAY") == nullptr) {
@@ -39,9 +43,11 @@ bool initRenderer(SDL_Window** window, SDL_Renderer** renderer) {
         return false;
     }
 
-    g_font = TTF_OpenFont("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 16.0f);
+    g_font = TTF_OpenFont(g_fontPath, 16);
     if (!g_font) {
         std::cerr << "Warning: Failed to load DejaVuSans.ttf: " << SDL_GetError() << std::endl;
+    } else {
+        g_fontCache[16] = g_font;
     }
 
     *window = g_window;
@@ -49,11 +55,90 @@ bool initRenderer(SDL_Window** window, SDL_Renderer** renderer) {
     return true;
 }
 
-void shutdownRenderer() {
-    if (g_font) {
-        TTF_CloseFont(g_font);
-        g_font = nullptr;
+static TTF_Font* getFontForSize(int size) {
+    if (size <= 0) {
+        return g_font;
     }
+    auto it = g_fontCache.find(size);
+    if (it != g_fontCache.end()) {
+        return it->second;
+    }
+    if (!g_fontPath) {
+        return g_font;
+    }
+    TTF_Font* font = TTF_OpenFont(g_fontPath, size);
+    if (font) {
+        g_fontCache[size] = font;
+        return font;
+    }
+    return g_font;
+}
+
+static SDL_Color parseHexColor(const std::string& text, SDL_Color fallback) {
+    if (text.empty() || text[0] != '#') return fallback;
+    unsigned int value = 0;
+    try {
+        value = std::stoul(text.substr(1), nullptr, 16);
+    } catch (...) {
+        return fallback;
+    }
+    if (text.size() == 7) {
+        return { static_cast<Uint8>((value >> 16) & 0xFF), static_cast<Uint8>((value >> 8) & 0xFF), static_cast<Uint8>(value & 0xFF), 255 };
+    }
+    if (text.size() == 9) {
+        return { static_cast<Uint8>((value >> 24) & 0xFF), static_cast<Uint8>((value >> 16) & 0xFF), static_cast<Uint8>((value >> 8) & 0xFF), static_cast<Uint8>(value & 0xFF) };
+    }
+    return fallback;
+}
+
+static int parseStyleInt(const Node* node, const std::string& key, int fallback) {
+    if (node->properties.contains(key)) {
+        if (node->properties[key].is_number_integer()) {
+            return node->properties[key].get<int>();
+        }
+        if (node->properties[key].is_number()) {
+            return static_cast<int>(node->properties[key].get<float>());
+        }
+    }
+    if (node->properties.contains("text") && node->properties["text"].is_object()) {
+        auto& textObj = node->properties["text"];
+        if (textObj.contains(key)) {
+            if (textObj[key].is_number_integer()) {
+                return textObj[key].get<int>();
+            }
+            if (textObj[key].is_number()) {
+                return static_cast<int>(textObj[key].get<float>());
+            }
+        }
+    }
+    return fallback;
+}
+
+static SDL_Color parseStyleColor(const Node* node, const std::string& key, SDL_Color fallback) {
+    if (node->properties.contains(key) && node->properties[key].is_string()) {
+        return parseHexColor(node->properties[key].get<std::string>(), fallback);
+    }
+    if (node->properties.contains("text") && node->properties["text"].is_object()) {
+        auto& textObj = node->properties["text"];
+        if (textObj.contains(key) && textObj[key].is_string()) {
+            return parseHexColor(textObj[key].get<std::string>(), fallback);
+        }
+    }
+    return fallback;
+}
+
+static void cleanupFontCache() {
+    for (auto& [size, font] : g_fontCache) {
+        if (font) {
+            TTF_CloseFont(font);
+        }
+    }
+    g_fontCache.clear();
+}
+
+void shutdownRenderer() {
+    cleanupFontCache();
+    g_font = nullptr;
     if (g_renderer) {
         SDL_DestroyRenderer(g_renderer);
         g_renderer = nullptr;
@@ -80,15 +165,14 @@ static void drawRectangle(SDL_Renderer* renderer, const Node* node, SDL_Color co
     }
 }
 
-static void drawText(SDL_Renderer* renderer, const std::string& text, int x, int y, SDL_Color color) {
+static void drawText(SDL_Renderer* renderer, const std::string& text, int x, int y, SDL_Color color, int fontSize = 16) {
     if (text.empty()) return;
-    
-    if (!g_font) {
-        // Fallback or silently drop text if no font loaded
+    TTF_Font* font = getFontForSize(fontSize);
+    if (!font) {
         return;
     }
 
-    SDL_Surface* surface = TTF_RenderText_Blended(g_font, text.c_str(), text.length(), color);
+    SDL_Surface* surface = TTF_RenderText_Blended(font, text.c_str(), text.length(), color);
     if (surface) {
         SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
         if (texture) {
@@ -114,15 +198,19 @@ static void renderNode(SDL_Renderer* renderer, const Node* node) {
         SDL_SetRenderDrawColor(renderer, 24, 26, 32, 255);
         SDL_RenderClear(renderer);
     } else if (node->type == NodeType::FlexV || node->type == NodeType::FlexH) {
-        drawRectangle(renderer, node, {36, 40, 52, 255}, true);
+        SDL_Color fillColor = parseStyleColor(node, "bgcolor", {36, 40, 52, 255});
+        drawRectangle(renderer, node, fillColor, true);
         drawRectangle(renderer, node, {78, 90, 110, 255}, false);
     } else if (node->type == NodeType::Image) {
         drawRectangle(renderer, node, {84, 100, 140, 255}, true);
         drawRectangle(renderer, node, {170, 190, 210, 255}, false);
         drawText(renderer, "IMG", static_cast<int>(node->x + 8.0f), static_cast<int>(node->y + 8.0f), {235, 235, 235, 255});
     } else if (node->type == NodeType::Text) {
-        drawRectangle(renderer, node, {24, 30, 40, 255}, true);
-        drawText(renderer, getNodeText(node), static_cast<int>(node->x + 6.0f), static_cast<int>(node->y + 6.0f), {230, 230, 230, 255});
+        SDL_Color bgColor = parseStyleColor(node, "bgcolor", {24, 30, 40, 255});
+        SDL_Color textColor = parseStyleColor(node, "color", {230, 230, 230, 255});
+        int fontSize = parseStyleInt(node, "fontsize", 16);
+        drawRectangle(renderer, node, bgColor, true);
+        drawText(renderer, getNodeText(node), static_cast<int>(node->x + 6.0f), static_cast<int>(node->y + 6.0f), textColor, fontSize);
     }
 
     for (const Node* child : node->children) {

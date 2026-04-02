@@ -813,6 +813,7 @@ CMakeFiles/browser.dir/src/main.cpp.o
  /usr/include/SDL3/SDL_tray.h
  /usr/include/SDL3/SDL_version.h
  /usr/include/SDL3/SDL_video.h
+ /usr/include/SDL3_ttf/SDL_ttf.h
  /usr/include/alloca.h
  /usr/include/asm-generic/bitsperlong.h
  /usr/include/asm-generic/errno-base.h
@@ -1525,6 +1526,7 @@ CMakeFiles/browser.dir/src/renderer.cpp.o
  /usr/include/SDL3/SDL_tray.h
  /usr/include/SDL3/SDL_version.h
  /usr/include/SDL3/SDL_video.h
+ /usr/include/SDL3_ttf/SDL_ttf.h
  /usr/include/alloca.h
  /usr/include/asm-generic/bitsperlong.h
  /usr/include/asm-generic/errno-base.h
@@ -2293,9 +2295,11 @@ browser
  /lib/x86_64-linux-gnu/libXss.so.1
  /lib/x86_64-linux-gnu/libasound.so.2
  /lib/x86_64-linux-gnu/libasyncns.so.0
+ /lib/x86_64-linux-gnu/libatomic.so.1
  /lib/x86_64-linux-gnu/libbrotlicommon.so.1
  /lib/x86_64-linux-gnu/libbrotlidec.so.1
  /lib/x86_64-linux-gnu/libbsd.so.0
+ /lib/x86_64-linux-gnu/libbz2.so.1.0
  /lib/x86_64-linux-gnu/libc.so.6
  /lib/x86_64-linux-gnu/libcap.so.2
  /lib/x86_64-linux-gnu/libcom_err.so.2
@@ -2305,10 +2309,14 @@ browser
  /lib/x86_64-linux-gnu/libdrm.so.2
  /lib/x86_64-linux-gnu/libexpat.so.1
  /lib/x86_64-linux-gnu/libffi.so.8
+ /lib/x86_64-linux-gnu/libfreetype.so.6
  /lib/x86_64-linux-gnu/libgbm.so.1
+ /lib/x86_64-linux-gnu/libglib-2.0.so.0
  /lib/x86_64-linux-gnu/libgmp.so.10
  /lib/x86_64-linux-gnu/libgnutls.so.30
+ /lib/x86_64-linux-gnu/libgraphite2.so.3
  /lib/x86_64-linux-gnu/libgssapi_krb5.so.2
+ /lib/x86_64-linux-gnu/libharfbuzz.so.0
  /lib/x86_64-linux-gnu/libhogweed.so.6
  /lib/x86_64-linux-gnu/libidn2.so.0
  /lib/x86_64-linux-gnu/libk5crypto.so.3
@@ -2328,7 +2336,9 @@ browser
  /lib/x86_64-linux-gnu/libogg.so.0
  /lib/x86_64-linux-gnu/libopus.so.0
  /lib/x86_64-linux-gnu/libp11-kit.so.0
+ /lib/x86_64-linux-gnu/libpcre2-8.so.0
  /lib/x86_64-linux-gnu/libpipewire-0.3.so.0
+ /lib/x86_64-linux-gnu/libpng16.so.16
  /lib/x86_64-linux-gnu/libpsl.so.5
  /lib/x86_64-linux-gnu/libpulse.so.0
  /lib/x86_64-linux-gnu/libresolv.so.2
@@ -2363,7 +2373,9 @@ browser
  /usr/lib/gcc/x86_64-linux-gnu/14/libgcc.a
  /usr/lib/gcc/x86_64-linux-gnu/14/libgcc_s.so
  /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so
+ /usr/lib/x86_64-linux-gnu/libSDL3.so
  /usr/lib/x86_64-linux-gnu/libSDL3.so.0.2.10
+ /usr/lib/x86_64-linux-gnu/libSDL3_ttf.so
  /usr/lib/x86_64-linux-gnu/libc_nonshared.a
  /usr/lib/x86_64-linux-gnu/libcurl.so
  /usr/lib/x86_64-linux-gnu/liblua5.4.so

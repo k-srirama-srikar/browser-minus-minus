@@ -64,8 +64,7 @@ CMakeFiles/browser.dir/src/renderer.cpp.o: \
  /usr/include/SDL3/SDL_storage.h /usr/include/SDL3/SDL_system.h \
  /usr/include/SDL3/SDL_time.h /usr/include/SDL3/SDL_timer.h \
  /usr/include/SDL3/SDL_tray.h /usr/include/SDL3/SDL_version.h \
- /usr/include/SDL3/SDL_oldnames.h \
- /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/include/dom.hpp \
+ /usr/include/SDL3/SDL_oldnames.h /usr/include/SDL3_ttf/SDL_ttf.h \
  /usr/include/c++/14/string /usr/include/c++/14/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/14/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/14/bits/os_defines.h \
@@ -155,8 +154,9 @@ CMakeFiles/browser.dir/src/renderer.cpp.o: \
  /usr/include/c++/14/bits/memory_resource.h /usr/include/c++/14/cstddef \
  /usr/include/c++/14/bits/uses_allocator.h \
  /usr/include/c++/14/bits/uses_allocator_args.h /usr/include/c++/14/tuple \
- /usr/include/c++/14/bits/ranges_util.h /usr/include/c++/14/vector \
- /usr/include/c++/14/bits/stl_uninitialized.h \
+ /usr/include/c++/14/bits/ranges_util.h \
+ /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/include/dom.hpp \
+ /usr/include/c++/14/vector /usr/include/c++/14/bits/stl_uninitialized.h \
  /usr/include/c++/14/bits/stl_vector.h \
  /usr/include/c++/14/bits/stl_bvector.h \
  /usr/include/c++/14/bits/vector.tcc \
@@ -320,4 +320,4 @@ CMakeFiles/browser.dir/src/renderer.cpp.o: \
  /usr/include/c++/14/ranges /usr/include/c++/14/bits/elements_of.h \
  /usr/include/c++/14/numeric /usr/include/c++/14/bits/stl_numeric.h \
  /usr/include/c++/14/pstl/glue_numeric_defs.h /usr/include/c++/14/any \
- /usr/include/c++/14/iostream /usr/include/SDL3_ttf/SDL_ttf.h
+ /usr/include/c++/14/iostream

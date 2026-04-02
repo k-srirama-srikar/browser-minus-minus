@@ -810,6 +810,7 @@ CMakeFiles/browser.dir/src/main.cpp.o: /home/srisri/Desktop/Srikar/Work/sp26/tec
   /usr/include/SDL3/SDL_tray.h \
   /usr/include/SDL3/SDL_version.h \
   /usr/include/SDL3/SDL_video.h \
+  /usr/include/SDL3_ttf/SDL_ttf.h \
   /usr/include/alloca.h \
   /usr/include/asm-generic/bitsperlong.h \
   /usr/include/asm-generic/errno-base.h \
@@ -1520,6 +1521,7 @@ CMakeFiles/browser.dir/src/renderer.cpp.o: /home/srisri/Desktop/Srikar/Work/sp26
   /usr/include/SDL3/SDL_tray.h \
   /usr/include/SDL3/SDL_version.h \
   /usr/include/SDL3/SDL_video.h \
+  /usr/include/SDL3_ttf/SDL_ttf.h \
   /usr/include/alloca.h \
   /usr/include/asm-generic/bitsperlong.h \
   /usr/include/asm-generic/errno-base.h \
@@ -2286,9 +2288,11 @@ browser: /lib/x86_64-linux-gnu/libFLAC.so.14 \
   /lib/x86_64-linux-gnu/libXss.so.1 \
   /lib/x86_64-linux-gnu/libasound.so.2 \
   /lib/x86_64-linux-gnu/libasyncns.so.0 \
+  /lib/x86_64-linux-gnu/libatomic.so.1 \
   /lib/x86_64-linux-gnu/libbrotlicommon.so.1 \
   /lib/x86_64-linux-gnu/libbrotlidec.so.1 \
   /lib/x86_64-linux-gnu/libbsd.so.0 \
+  /lib/x86_64-linux-gnu/libbz2.so.1.0 \
   /lib/x86_64-linux-gnu/libc.so.6 \
   /lib/x86_64-linux-gnu/libcap.so.2 \
   /lib/x86_64-linux-gnu/libcom_err.so.2 \
@@ -2298,10 +2302,14 @@ browser: /lib/x86_64-linux-gnu/libFLAC.so.14 \
   /lib/x86_64-linux-gnu/libdrm.so.2 \
   /lib/x86_64-linux-gnu/libexpat.so.1 \
   /lib/x86_64-linux-gnu/libffi.so.8 \
+  /lib/x86_64-linux-gnu/libfreetype.so.6 \
   /lib/x86_64-linux-gnu/libgbm.so.1 \
+  /lib/x86_64-linux-gnu/libglib-2.0.so.0 \
   /lib/x86_64-linux-gnu/libgmp.so.10 \
   /lib/x86_64-linux-gnu/libgnutls.so.30 \
+  /lib/x86_64-linux-gnu/libgraphite2.so.3 \
   /lib/x86_64-linux-gnu/libgssapi_krb5.so.2 \
+  /lib/x86_64-linux-gnu/libharfbuzz.so.0 \
   /lib/x86_64-linux-gnu/libhogweed.so.6 \
   /lib/x86_64-linux-gnu/libidn2.so.0 \
   /lib/x86_64-linux-gnu/libk5crypto.so.3 \
@@ -2321,7 +2329,9 @@ browser: /lib/x86_64-linux-gnu/libFLAC.so.14 \
   /lib/x86_64-linux-gnu/libogg.so.0 \
   /lib/x86_64-linux-gnu/libopus.so.0 \
   /lib/x86_64-linux-gnu/libp11-kit.so.0 \
+  /lib/x86_64-linux-gnu/libpcre2-8.so.0 \
   /lib/x86_64-linux-gnu/libpipewire-0.3.so.0 \
+  /lib/x86_64-linux-gnu/libpng16.so.16 \
   /lib/x86_64-linux-gnu/libpsl.so.5 \
   /lib/x86_64-linux-gnu/libpulse.so.0 \
   /lib/x86_64-linux-gnu/libresolv.so.2 \
@@ -2356,7 +2366,9 @@ browser: /lib/x86_64-linux-gnu/libFLAC.so.14 \
   /usr/lib/gcc/x86_64-linux-gnu/14/libgcc.a \
   /usr/lib/gcc/x86_64-linux-gnu/14/libgcc_s.so \
   /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so \
+  /usr/lib/x86_64-linux-gnu/libSDL3.so \
   /usr/lib/x86_64-linux-gnu/libSDL3.so.0.2.10 \
+  /usr/lib/x86_64-linux-gnu/libSDL3_ttf.so \
   /usr/lib/x86_64-linux-gnu/libc_nonshared.a \
   /usr/lib/x86_64-linux-gnu/libcurl.so \
   /usr/lib/x86_64-linux-gnu/liblua5.4.so \
@@ -2376,6 +2388,8 @@ CMakeFiles/browser.dir/src/layout.cpp.o:
 /usr/lib/x86_64-linux-gnu/pulseaudio/libpulsecommon-17.0.so:
 
 /usr/lib/x86_64-linux-gnu/liblua5.4.so:
+
+/usr/lib/x86_64-linux-gnu/libSDL3_ttf.so:
 
 /usr/lib/x86_64-linux-gnu/libSDL3.so.0.2.10:
 
@@ -2400,6 +2414,16 @@ CMakeFiles/browser.dir/src/layout.cpp.o:
 /lib/x86_64-linux-gnu/libxcb.so.1:
 
 /lib/x86_64-linux-gnu/libwayland-egl.so.1:
+
+/lib/x86_64-linux-gnu/libwayland-cursor.so.0:
+
+/lib/x86_64-linux-gnu/libvorbisenc.so.2:
+
+/lib/x86_64-linux-gnu/libtasn1.so.6:
+
+/lib/x86_64-linux-gnu/libssl.so.3:
+
+/lib/x86_64-linux-gnu/libssh2.so.1:
 
 /usr/include/x86_64-linux-gnu/bits/getopt_posix.h:
 
@@ -2533,8 +2557,6 @@ CMakeFiles/browser.dir/src/renderer.cpp.o:
 
 /usr/include/SDL3/SDL_misc.h:
 
-/usr/include/c++/14/cstdlib:
-
 /lib/x86_64-linux-gnu/libXdmcp.so.6:
 
 /usr/include/c++/14/cstdio:
@@ -2549,13 +2571,9 @@ CMakeFiles/browser.dir/src/renderer.cpp.o:
 
 /usr/lib/linux/uapi/x86/asm/sockios.h:
 
-/usr/include/c++/14/ostream:
-
 /usr/include/SDL3/SDL_mutex.h:
 
 /usr/include/x86_64-linux-gnu/bits/socket_type.h:
-
-/lib/x86_64-linux-gnu/libwayland-cursor.so.0:
 
 /usr/include/SDL3/SDL_mouse.h:
 
@@ -2601,6 +2619,8 @@ CMakeFiles/browser.dir/src/renderer.cpp.o:
 
 /usr/include/c++/14/array:
 
+/lib/x86_64-linux-gnu/libgraphite2.so.3:
+
 /usr/include/c++/14/bits/fs_ops.h:
 
 /usr/include/c++/14/bits/indirect_array.h:
@@ -2614,6 +2634,12 @@ CMakeFiles/browser.dir/src/renderer.cpp.o:
 /lib/x86_64-linux-gnu/libFLAC.so.14:
 
 /usr/include/c++/14/tr1/legendre_function.tcc:
+
+/lib/x86_64-linux-gnu/libwayland-client.so.0:
+
+/usr/include/c++/14/bits/version.h:
+
+/usr/include/x86_64-linux-gnu/curl/mprintf.h:
 
 /usr/include/c++/14/format:
 
@@ -2648,6 +2674,10 @@ CMakeFiles/browser.dir/src/renderer.cpp.o:
 /usr/include/c++/14/bits/concept_check.h:
 
 /usr/include/c++/14/ext/aligned_buffer.h:
+
+/lib/x86_64-linux-gnu/libsystemd.so.0:
+
+/usr/include/c++/14/bits/ostream.tcc:
 
 /usr/include/c++/14/bits/cpp_type_traits.h:
 
@@ -2684,6 +2714,10 @@ CMakeFiles/browser.dir/src/renderer.cpp.o:
 /usr/include/c++/14/bits/enable_special_members.h:
 
 /usr/include/c++/14/bits/std_function.h:
+
+/lib/x86_64-linux-gnu/libunistring.so.5:
+
+/usr/include/c++/14/tr1/poly_laguerre.tcc:
 
 /usr/include/c++/14/string_view:
 
@@ -2784,6 +2818,8 @@ CMakeFiles/browser.dir/src/dom.cpp.o:
 /usr/include/c++/14/bits/specfun.h:
 
 /usr/include/c++/14/backward/binders.h:
+
+/lib/x86_64-linux-gnu/libglib-2.0.so.0:
 
 CMakeFiles/browser.dir/src/scripting.cpp.o:
 
@@ -2905,6 +2941,8 @@ CMakeFiles/browser.dir/src/scripting.cpp.o:
 
 /usr/lib/linux/uapi/x86/asm/posix_types_64.h:
 
+/usr/lib/x86_64-linux-gnu/libSDL3.so:
+
 /lib/x86_64-linux-gnu/libX11.so.6:
 
 /usr/include/c++/14/bits/locale_facets_nonio.h:
@@ -2954,6 +2992,8 @@ CMakeFiles/browser.dir/src/scripting.cpp.o:
 /usr/include/x86_64-linux-gnu/bits/posix_opt.h:
 
 /usr/include/c++/14/bits/nested_exception.h:
+
+/lib/x86_64-linux-gnu/libbz2.so.1.0:
 
 /usr/lib/x86_64-linux-gnu/libc.so:
 
@@ -3127,8 +3167,6 @@ CMakeFiles/browser.dir/src/scripting.cpp.o:
 
 /usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
 
-/lib/x86_64-linux-gnu/libvorbisenc.so.2:
-
 /usr/include/x86_64-linux-gnu/bits/stdint-least.h:
 
 /usr/include/c++/14/bits/forward_list.tcc:
@@ -3209,6 +3247,8 @@ CMakeFiles/browser.dir/src/scripting.cpp.o:
 
 /lib/x86_64-linux-gnu/libgbm.so.1:
 
+/lib/x86_64-linux-gnu/libpcre2-8.so.0:
+
 /lib/x86_64-linux-gnu/libopus.so.0:
 
 /usr/include/x86_64-linux-gnu/c++/14/bits/c++allocator.h:
@@ -3277,10 +3317,6 @@ CMakeFiles/browser.dir/src/scripting.cpp.o:
 
 /usr/lib/linux/uapi/x86/asm/unistd_64.h:
 
-/usr/include/c++/14/bits/ostream.tcc:
-
-/lib/x86_64-linux-gnu/libsystemd.so.0:
-
 /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/layout.cpp:
 
 /usr/include/SDL3/SDL_properties.h:
@@ -3290,8 +3326,6 @@ CMakeFiles/browser.dir/src/scripting.cpp.o:
 /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/include/scripting.hpp:
 
 /usr/include/SDL3/SDL_touch.h:
-
-/lib/x86_64-linux-gnu/libtasn1.so.6:
 
 /usr/include/SDL3/SDL.h:
 
@@ -3320,6 +3354,10 @@ CMakeFiles/browser.dir/src/scripting.cpp.o:
 /usr/include/c++/14/pstl/pstl_config.h:
 
 /usr/include/SDL3/SDL_close_code.h:
+
+/usr/include/c++/14/ostream:
+
+/usr/include/SDL3_ttf/SDL_ttf.h:
 
 /usr/include/c++/14/codecvt:
 
@@ -3423,6 +3461,10 @@ CMakeFiles/browser.dir/src/scripting.cpp.o:
 
 /lib/x86_64-linux-gnu/libXi.so.6:
 
+/usr/include/c++/14/cstdlib:
+
+/lib/x86_64-linux-gnu/libatomic.so.1:
+
 /lib/x86_64-linux-gnu/libbrotlicommon.so.1:
 
 /usr/include/c++/14/bits/locale_classes.tcc:
@@ -3447,6 +3489,8 @@ CMakeFiles/browser.dir/src/scripting.cpp.o:
 
 /lib/x86_64-linux-gnu/libdrm.so.2:
 
+/lib/x86_64-linux-gnu/libfreetype.so.6:
+
 /lib/x86_64-linux-gnu/libgmp.so.10:
 
 /lib/x86_64-linux-gnu/libpulse.so.0:
@@ -3456,6 +3500,8 @@ CMakeFiles/browser.dir/src/scripting.cpp.o:
 /usr/include/c++/14/bits/ranges_cmp.h:
 
 /lib/x86_64-linux-gnu/libgnutls.so.30:
+
+/lib/x86_64-linux-gnu/libharfbuzz.so.0:
 
 /lib/x86_64-linux-gnu/libidn2.so.0:
 
@@ -3489,22 +3535,10 @@ CMakeFiles/browser.dir/src/scripting.cpp.o:
 
 /lib/x86_64-linux-gnu/libp11-kit.so.0:
 
+/lib/x86_64-linux-gnu/libpng16.so.16:
+
 /usr/include/x86_64-linux-gnu/bits/types/FILE.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/time_t.h:
 
 /lib/x86_64-linux-gnu/libsndio.so.7:
-
-/lib/x86_64-linux-gnu/libssh2.so.1:
-
-/lib/x86_64-linux-gnu/libssl.so.3:
-
-/usr/include/c++/14/tr1/poly_laguerre.tcc:
-
-/lib/x86_64-linux-gnu/libunistring.so.5:
-
-/usr/include/c++/14/bits/version.h:
-
-/usr/include/x86_64-linux-gnu/curl/mprintf.h:
-
-/lib/x86_64-linux-gnu/libwayland-client.so.0:

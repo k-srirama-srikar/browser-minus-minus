@@ -324,4 +324,5 @@ CMakeFiles/browser.dir/src/main.cpp.o: \
  /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/include/layout.hpp \
  /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/include/network.hpp \
  /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/include/renderer.hpp \
+ /usr/include/SDL3_ttf/SDL_ttf.h \
  /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/include/scripting.hpp
