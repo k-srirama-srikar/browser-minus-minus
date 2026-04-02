@@ -4,13 +4,48 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <vector>
+#include <fstream>
 #include <SDL3_ttf/SDL_ttf.h>
 
 static SDL_Window* g_window = nullptr;
 static SDL_Renderer* g_renderer = nullptr;
 static TTF_Font* g_font = nullptr;
 static std::unordered_map<int, TTF_Font*> g_fontCache;
-static const char* g_fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+static std::string g_fontPath;
+
+static bool fileExists(const std::string& path) {
+    if (path.empty()) {
+        return false;
+    }
+    std::ifstream file(path);
+    return file.is_open();
+}
+
+static std::string locateFontPath() {
+    std::vector<std::string> candidates;
+    const char* envFont = getenv("BROWSER_FONT");
+    if (envFont && envFont[0]) {
+        candidates.emplace_back(envFont);
+    }
+    const char* envFont2 = getenv("FONT");
+    if (envFont2 && envFont2[0]) {
+        candidates.emplace_back(envFont2);
+    }
+    candidates.emplace_back("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
+    candidates.emplace_back("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf");
+    candidates.emplace_back("/usr/share/fonts/truetype/freefont/FreeSans.ttf");
+    candidates.emplace_back("/Library/Fonts/Arial.ttf");
+    candidates.emplace_back("/System/Library/Fonts/SFNS.ttf");
+    candidates.emplace_back("C:\\Windows\\Fonts\\arial.ttf");
+
+    for (const std::string& candidate : candidates) {
+        if (fileExists(candidate)) {
+            return candidate;
+        }
+    }
+    return std::string();
+}
 
 bool initRenderer(SDL_Window** window, SDL_Renderer** renderer) {
     if (getenv("DISPLAY") == nullptr && getenv("WAYLAND_DISPLAY") == nullptr) {
@@ -43,11 +78,16 @@ bool initRenderer(SDL_Window** window, SDL_Renderer** renderer) {
         return false;
     }
 
-    g_font = TTF_OpenFont(g_fontPath, 16);
-    if (!g_font) {
-        std::cerr << "Warning: Failed to load DejaVuSans.ttf: " << SDL_GetError() << std::endl;
+    g_fontPath = locateFontPath();
+    if (!g_fontPath.empty()) {
+        g_font = TTF_OpenFont(g_fontPath.c_str(), 16);
+        if (!g_font) {
+            std::cerr << "Warning: Failed to load font at " << g_fontPath << ": " << SDL_GetError() << std::endl;
+        } else {
+            g_fontCache[16] = g_font;
+        }
     } else {
-        g_fontCache[16] = g_font;
+        std::cerr << "Warning: No system font found; text rendering will be disabled unless BROWSER_FONT is set." << std::endl;
     }
 
     *window = g_window;
@@ -63,10 +103,10 @@ static TTF_Font* getFontForSize(int size) {
     if (it != g_fontCache.end()) {
         return it->second;
     }
-    if (!g_fontPath) {
+    if (g_fontPath.empty()) {
         return g_font;
     }
-    TTF_Font* font = TTF_OpenFont(g_fontPath, size);
+    TTF_Font* font = TTF_OpenFont(g_fontPath.c_str(), size);
     if (font) {
         g_fontCache[size] = font;
         return font;
