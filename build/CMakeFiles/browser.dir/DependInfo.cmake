@@ -8,13 +8,12 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/dom.cpp" "CMakeFiles/browser.dir/src/dom.cpp.o" "gcc" "CMakeFiles/browser.dir/src/dom.cpp.o.d"
-  "/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/layout.cpp" "CMakeFiles/browser.dir/src/layout.cpp.o" "gcc" "CMakeFiles/browser.dir/src/layout.cpp.o.d"
-  "/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/main.cpp" "CMakeFiles/browser.dir/src/main.cpp.o" "gcc" "CMakeFiles/browser.dir/src/main.cpp.o.d"
-  "/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/network.cpp" "CMakeFiles/browser.dir/src/network.cpp.o" "gcc" "CMakeFiles/browser.dir/src/network.cpp.o.d"
-  "/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/renderer.cpp" "CMakeFiles/browser.dir/src/renderer.cpp.o" "gcc" "CMakeFiles/browser.dir/src/renderer.cpp.o.d"
-  "/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/src/scripting.cpp" "CMakeFiles/browser.dir/src/scripting.cpp.o" "gcc" "CMakeFiles/browser.dir/src/scripting.cpp.o.d"
-  "" "browser" "gcc" "CMakeFiles/browser.dir/link.d"
+  "/home/shravani/browser/browser-minus-minus/src/dom.cpp" "CMakeFiles/browser.dir/src/dom.cpp.o" "gcc" "CMakeFiles/browser.dir/src/dom.cpp.o.d"
+  "/home/shravani/browser/browser-minus-minus/src/layout.cpp" "CMakeFiles/browser.dir/src/layout.cpp.o" "gcc" "CMakeFiles/browser.dir/src/layout.cpp.o.d"
+  "/home/shravani/browser/browser-minus-minus/src/main.cpp" "CMakeFiles/browser.dir/src/main.cpp.o" "gcc" "CMakeFiles/browser.dir/src/main.cpp.o.d"
+  "/home/shravani/browser/browser-minus-minus/src/network.cpp" "CMakeFiles/browser.dir/src/network.cpp.o" "gcc" "CMakeFiles/browser.dir/src/network.cpp.o.d"
+  "/home/shravani/browser/browser-minus-minus/src/renderer.cpp" "CMakeFiles/browser.dir/src/renderer.cpp.o" "gcc" "CMakeFiles/browser.dir/src/renderer.cpp.o.d"
+  "/home/shravani/browser/browser-minus-minus/src/scripting.cpp" "CMakeFiles/browser.dir/src/scripting.cpp.o" "gcc" "CMakeFiles/browser.dir/src/scripting.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.
