@@ -156,7 +156,7 @@
       },
       {
         "image": {
-          "url": "cat.png",
+          "url": "assets/cat.png",
           "alttext": "A sample image for rendering tests"
         },
         "tag": "hero-image",
