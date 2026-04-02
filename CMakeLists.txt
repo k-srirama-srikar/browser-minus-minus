@@ -78,3 +78,9 @@ target_link_libraries(browser
     ${CURL_LIBRARY_RELEASE}
     pthread
 )
+
+# Optionally link SDL3_image if available
+if(SDL3_image_FOUND)
+    target_link_libraries(browser PkgConfig::SDL3_image)
+    target_compile_definitions(browser PRIVATE HAS_SDL3_IMAGE=1)
+endif()

@@ -8,10 +8,15 @@
 #include <fstream>
 #include <SDL3_ttf/SDL_ttf.h>
 
+#ifdef HAS_SDL3_IMAGE
+#include <SDL3_image/SDL_image.h>
+#endif
+
 static SDL_Window* g_window = nullptr;
 static SDL_Renderer* g_renderer = nullptr;
 static TTF_Font* g_font = nullptr;
 static std::unordered_map<int, TTF_Font*> g_fontCache;
+static std::unordered_map<std::string, SDL_Texture*> g_imageCache;
 static std::string g_fontPath;
 
 static bool fileExists(const std::string& path) {
@@ -32,10 +37,16 @@ static std::string locateFontPath() {
     if (envFont2 && envFont2[0]) {
         candidates.emplace_back(envFont2);
     }
-    // Local assets first
+
+    // Local assets first (support various working directory cases)
+    candidates.emplace_back("src/assets/DejaVuSans.ttf");
+    candidates.emplace_back("src/assets/LiberationSans-Regular.ttf");
+    candidates.emplace_back("assets/DejaVuSans.ttf");
+    candidates.emplace_back("assets/LiberationSans-Regular.ttf");
     candidates.emplace_back("../src/assets/DejaVuSans.ttf");
     candidates.emplace_back("../src/assets/LiberationSans-Regular.ttf");
-    // System fonts as fallbacks
+
+    // System fonts as fallback
     candidates.emplace_back("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
     candidates.emplace_back("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf");
     candidates.emplace_back("/usr/share/fonts/truetype/freefont/FreeSans.ttf");
@@ -45,10 +56,43 @@ static std::string locateFontPath() {
 
     for (const std::string& candidate : candidates) {
         if (fileExists(candidate)) {
+            // std::cout << "Font candidate found: " << candidate << std::endl;
             return candidate;
         }
     }
+    // std::cerr << "No font candidate found in search path." << std::endl;
     return std::string();
+}
+
+static SDL_Texture* loadImageTexture(const std::string& path) {
+    if (path.empty()) return nullptr;
+
+    // Check cache first
+    auto it = g_imageCache.find(path);
+    if (it != g_imageCache.end()) {
+        return it->second;
+    }
+
+    SDL_Texture* texture = nullptr;
+    
+#ifdef HAS_SDL3_IMAGE
+    // Use SDL_image for loading various formats
+    SDL_Surface* surface = IMG_Load(path.c_str());
+    if (surface) {
+        texture = SDL_CreateTextureFromSurface(g_renderer, surface);
+        SDL_DestroySurface(surface);
+        if (texture) {
+            g_imageCache[path] = texture;
+            // std::cout << "Image loaded: " << path << std::endl;
+        }
+    } else {
+        // std::cerr << "Failed to load image " << path << ": " << SDL_GetError() << std::endl;
+    }
+#else
+    std::cerr << "SDL3_image not available; cannot load image: " << path << std::endl;
+#endif
+    
+    return texture;
 }
 
 bool initRenderer(SDL_Window** window, SDL_Renderer** renderer) {
@@ -180,8 +224,18 @@ static void cleanupFontCache() {
     g_fontCache.clear();
 }
 
+static void cleanupImageCache() {
+    for (auto& [path, texture] : g_imageCache) {
+        if (texture) {
+            SDL_DestroyTexture(texture);
+        }
+    }
+    g_imageCache.clear();
+}
+
 void shutdownRenderer() {
     cleanupFontCache();
+    cleanupImageCache();
     g_font = nullptr;
     if (g_renderer) {
         SDL_DestroyRenderer(g_renderer);
@@ -246,9 +300,36 @@ static void renderNode(SDL_Renderer* renderer, const Node* node) {
         drawRectangle(renderer, node, fillColor, true);
         drawRectangle(renderer, node, {78, 90, 110, 255}, false);
     } else if (node->type == NodeType::Image) {
-        drawRectangle(renderer, node, {84, 100, 140, 255}, true);
+        std::string altText = "[Image]";
+        std::string imageUrl;
+        SDL_Texture* imageTexture = nullptr;
+        
+        if (node->properties.contains("image") && node->properties["image"].is_object()) {
+            if (node->properties["image"].contains("alttext") && node->properties["image"]["alttext"].is_string()) {
+                altText = node->properties["image"]["alttext"].get<std::string>();
+            }
+            if (node->properties["image"].contains("url") && node->properties["image"]["url"].is_string()) {
+                imageUrl = node->properties["image"]["url"].get<std::string>();
+                imageTexture = loadImageTexture(imageUrl);
+            }
+        }
+        
+        // Draw background
+        SDL_Color bgColor = parseStyleColor(node, "bgcolor", {84, 100, 140, 255});
+        drawRectangle(renderer, node, bgColor, true);
         drawRectangle(renderer, node, {170, 190, 210, 255}, false);
-        drawText(renderer, "IMG", static_cast<int>(node->x + 8.0f), static_cast<int>(node->y + 8.0f), {235, 235, 235, 255});
+        
+        // Try to render actual image if loaded
+        if (imageTexture) {
+            SDL_FRect dest = {node->x, node->y, node->width, node->height};
+            SDL_RenderTexture(renderer, imageTexture, nullptr, &dest);
+        } else {
+            // Fallback: render alttext with URL info
+            drawText(renderer, altText, static_cast<int>(node->x + 8.0f), static_cast<int>(node->y + 8.0f), {235, 235, 235, 255}, 12);
+            if (!imageUrl.empty()) {
+                drawText(renderer, "URL: " + imageUrl, static_cast<int>(node->x + 8.0f), static_cast<int>(node->y + 28.0f), {180, 180, 180, 255}, 10);
+            }
+        }
     } else if (node->type == NodeType::Text) {
         SDL_Color bgColor = parseStyleColor(node, "bgcolor", {24, 30, 40, 255});
         SDL_Color textColor = parseStyleColor(node, "color", {230, 230, 230, 255});
