@@ -1,3 +1,0 @@
-/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/build/CMakeFiles/browser.dir
-/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/build/CMakeFiles/edit_cache.dir
-/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/build/CMakeFiles/rebuild_cache.dir
