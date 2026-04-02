@@ -1,0 +1,6 @@
+{
+  "source": "local file",
+  "content": "This text was loaded using browser.fetch from assets/test2_data.json.",
+  "items": [1, 2, 3],
+  "nested": { "message": "fetch API is working" }
+}

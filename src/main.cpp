@@ -61,8 +61,10 @@ static Node* getIntersectingNode(Node* current, float mouseX, float mouseY) {
 
 int main(int argc, char* argv[]) {
     std::string pageSource;
+    std::string currentUrl = "default";
     if (argc > 1) {
         std::string target = argv[1];
+        currentUrl = target;
         if (target.rfind("http://", 0) == 0 || target.rfind("https://", 0) == 0) {
             // fetchUrl is stubbed somewhere else or not fully available
             // but we'll try it if provided
@@ -84,7 +86,9 @@ int main(int argc, char* argv[]) {
     if (!initScripting(document)) {
         std::cerr << "Lua scripting initialization failed." << std::endl;
     }
-    
+    setCurrentUrl(currentUrl);
+    setScreenSize(1280, 720);
+
     // Evaluate external JSML lua source
     if (document->properties.contains("lua") && document->properties["lua"].is_string()) {
         std::string scriptPath = document->properties["lua"].get<std::string>();

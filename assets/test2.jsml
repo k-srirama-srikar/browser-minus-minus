@@ -1,0 +1,205 @@
+{
+  "lua": "assets/test2.lua",
+  "root": {
+    "flexv": [
+      {
+        "text": {
+          "content": "Browser++ Complete Feature Test",
+          "fontsize": 28,
+          "color": "#f8fafc"
+        },
+        "tag": "title",
+        "bgcolor": "#0f172a",
+        "spacing": 16
+      },
+      {
+        "flexh": [
+          {
+            "text": {
+              "content": "Tab A",
+              "fontsize": 16,
+              "color": "#e2e8f0"
+            },
+            "tag": "tab",
+            "bgcolor": "#1e293b",
+            "spacing": 10,
+            "onclick": "tabClicked"
+          },
+          {
+            "text": {
+              "content": "Tab B",
+              "fontsize": 16,
+              "color": "#e2e8f0"
+            },
+            "tag": "tab",
+            "bgcolor": "#1e293b",
+            "spacing": 10
+          },
+          {
+            "text": {
+              "content": "Tab C",
+              "fontsize": 16,
+              "color": "#94a3b8"
+            },
+            "tag": "tab",
+            "bgcolor": "#334155",
+            "spacing": 10
+          }
+        ],
+        "tag": "tabbar",
+        "bgcolor": "#0f172a",
+        "spacing": 12
+      },
+      {
+        "flexh": [
+          {
+            "flexv": [
+              {
+                "text": {
+                  "content": "Page Controls",
+                  "fontsize": 20,
+                  "color": "#f8fafc"
+                },
+                "tag": "section-title",
+                "bgcolor": "#111827",
+                "spacing": 8
+              },
+              {
+                "text": {
+                  "content": "This section shows API usage, static layout, nested flexboxes, and text rendering.",
+                  "fontsize": 14,
+                  "color": "#cbd5e1"
+                },
+                "tag": "instructions",
+                "bgcolor": "#111827",
+                "spacing": 8
+              },
+              {
+                "text": {
+                  "content": "Current URL: loading...",
+                  "fontsize": 14,
+                  "color": "#e2e8f0"
+                },
+                "tag": "current-url",
+                "bgcolor": "#0f172a",
+                "spacing": 6
+              },
+              {
+                "text": {
+                  "content": "Screen size: calculating...",
+                  "fontsize": 14,
+                  "color": "#e2e8f0"
+                },
+                "tag": "screen-size",
+                "bgcolor": "#0f172a",
+                "spacing": 6
+              }
+            ],
+            "tag": "left-panel",
+            "bgcolor": "#0f172a",
+            "spacing": 10
+          },
+          {
+            "flexv": [
+              {
+                "text": {
+                  "content": "Action Buttons",
+                  "fontsize": 20,
+                  "color": "#f8fafc"
+                },
+                "tag": "action-title",
+                "bgcolor": "#111827",
+                "spacing": 8
+              },
+              {
+                "text": {
+                  "content": "Button One",
+                  "fontsize": 16,
+                  "color": "#ffffff"
+                },
+                "tag": "button-one",
+                "bgcolor": "#3b82f6",
+                "spacing": 8,
+                "onclick": "buttonOne"
+              },
+              {
+                "text": {
+                  "content": "Button Two",
+                  "fontsize": 16,
+                  "color": "#ffffff"
+                },
+                "tag": "button-two",
+                "bgcolor": "#10b981",
+                "spacing": 8,
+                "onclick": "buttonTwo"
+              },
+              {
+                "text": {
+                  "content": "Button Three",
+                  "fontsize": 16,
+                  "color": "#000000"
+                },
+                "tag": "button-three",
+                "bgcolor": "#facc15",
+                "spacing": 8,
+                "onclick": "buttonThree"
+              }
+            ],
+            "tag": "right-panel",
+            "bgcolor": "#0f172a",
+            "spacing": 10
+          }
+        ],
+        "tag": "top-row",
+        "bgcolor": "#111827",
+        "spacing": 14
+      },
+      {
+        "image": {
+          "url": "assets/cat.png",
+          "alttext": "A sample image for rendering tests"
+        },
+        "tag": "hero-image",
+        "bgcolor": "#020617",
+        "spacing": 12
+      },
+      {
+        "flexv": [
+          {
+            "text": {
+              "content": "Fetch Status: waiting for network contents...",
+              "fontsize": 14,
+              "color": "#c0ca33"
+            },
+            "tag": "fetch-status",
+            "bgcolor": "#111827",
+            "spacing": 8
+          },
+          {
+            "text": {
+              "content": "Fetched content will appear below once browser.fetch() completes.",
+              "fontsize": 14,
+              "color": "#cbd5e1"
+            },
+            "tag": "fetched-content",
+            "bgcolor": "#0f172a",
+            "spacing": 8
+          }
+        ],
+        "tag": "fetch-area",
+        "bgcolor": "#111827",
+        "spacing": 12
+      },
+      {
+        "text": {
+          "content": "Nested layout test: this text lives inside a vertical container and should wrap or size correctly.",
+          "fontsize": 12,
+          "color": "#94a3b8"
+        },
+        "tag": "nested-info",
+        "bgcolor": "#0f172a",
+        "spacing": 10
+      }
+    ]
+  }
+}

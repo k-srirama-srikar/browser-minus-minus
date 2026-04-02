@@ -1568,6 +1568,7 @@ CMakeFiles/browser.dir/src/renderer.cpp.o: /home/srisri/Desktop/Srikar/Work/sp26
   /usr/include/c++/14/bits/fs_fwd.h \
   /usr/include/c++/14/bits/fs_ops.h \
   /usr/include/c++/14/bits/fs_path.h \
+  /usr/include/c++/14/bits/fstream.tcc \
   /usr/include/c++/14/bits/functexcept.h \
   /usr/include/c++/14/bits/functional_hash.h \
   /usr/include/c++/14/bits/gslice.h \
@@ -1693,6 +1694,7 @@ CMakeFiles/browser.dir/src/renderer.cpp.o: /home/srisri/Desktop/Srikar/Work/sp26
   /usr/include/c++/14/filesystem \
   /usr/include/c++/14/format \
   /usr/include/c++/14/forward_list \
+  /usr/include/c++/14/fstream \
   /usr/include/c++/14/functional \
   /usr/include/c++/14/initializer_list \
   /usr/include/c++/14/iomanip \
@@ -1858,8 +1860,10 @@ CMakeFiles/browser.dir/src/renderer.cpp.o: /home/srisri/Desktop/Srikar/Work/sp26
   /usr/include/x86_64-linux-gnu/bits/wordsize.h \
   /usr/include/x86_64-linux-gnu/bits/xopen_lim.h \
   /usr/include/x86_64-linux-gnu/c++/14/bits/atomic_word.h \
+  /usr/include/x86_64-linux-gnu/c++/14/bits/basic_file.h \
   /usr/include/x86_64-linux-gnu/c++/14/bits/c++allocator.h \
   /usr/include/x86_64-linux-gnu/c++/14/bits/c++config.h \
+  /usr/include/x86_64-linux-gnu/c++/14/bits/c++io.h \
   /usr/include/x86_64-linux-gnu/c++/14/bits/c++locale.h \
   /usr/include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h \
   /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_base.h \
@@ -1895,6 +1899,7 @@ CMakeFiles/browser.dir/src/scripting.cpp.o: /home/srisri/Desktop/Srikar/Work/sp2
   /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/external/sol2/include/sol/config.hpp \
   /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/external/sol2/include/sol/sol.hpp \
   /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/include/dom.hpp \
+  /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/include/network.hpp \
   /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/include/scripting.hpp \
   /usr/include/alloca.h \
   /usr/include/asm-generic/bitsperlong.h \

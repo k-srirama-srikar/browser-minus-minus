@@ -289,6 +289,7 @@ CMakeFiles/browser.dir/src/scripting.cpp.o: \
  /usr/include/c++/14/ranges /usr/include/c++/14/bits/elements_of.h \
  /usr/include/c++/14/numeric /usr/include/c++/14/bits/stl_numeric.h \
  /usr/include/c++/14/pstl/glue_numeric_defs.h /usr/include/c++/14/any \
+ /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/include/network.hpp \
  /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/external/sol2/include/sol/sol.hpp \
  /home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/external/sol2/include/sol/config.hpp \
  /usr/include/c++/14/iostream /usr/include/lua5.4/lua.hpp \
