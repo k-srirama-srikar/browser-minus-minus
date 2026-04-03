@@ -38,6 +38,12 @@ if (NOT SDL3_ttf_FOUND)
     FetchContent_MakeAvailable(SDL3_ttf)
 endif()
 
+# Try to find SDL3_image locally for runtime image formats
+pkg_check_modules(SDL3_image QUIET IMPORTED_TARGET sdl3-image)
+if (NOT SDL3_image_FOUND)
+    message(STATUS "SDL3_image not found; image support disabled.")
+endif()
+
 # Include external and local headers
 include_directories(include external/nlohmann/include/single_include external/sol2/include ${LUA_INCLUDE_DIR} ${CURL_INCLUDE_DIR})
 if(sdl3_SOURCE_DIR)
@@ -80,7 +86,12 @@ target_link_libraries(browser
 )
 
 # Optionally link SDL3_image if available
-if(SDL3_image_FOUND)
+if(TARGET PkgConfig::SDL3_image)
     target_link_libraries(browser PkgConfig::SDL3_image)
     target_compile_definitions(browser PRIVATE HAS_SDL3_IMAGE=1)
+elseif(SDL3_image_FOUND)
+    # SDL3_image was found by pkg-config, but imported target is missing; fail-safe.
+    message(WARNING "SDL3_image found by pkg-config but PkgConfig::SDL3_image target is unavailable. Image support will be disabled.")
+else()
+    message(STATUS "SDL3_image not found; image support disabled.")
 endif()

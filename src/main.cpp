@@ -59,17 +59,63 @@ static Node* getIntersectingNode(Node* current, float mouseX, float mouseY) {
     return nullptr;
 }
 
+static void navigateTo(const std::string& url, Node** document, std::string& currentUrl) {
+    std::string pageSource;
+    if (url.rfind("http://", 0) == 0 || url.rfind("https://", 0) == 0) {
+        if (!fetchUrl(url, pageSource)) {
+            std::cerr << "Failed to fetch URL: " << url << std::endl;
+            return;
+        }
+    } else {
+        if (!loadFileCustom(url, pageSource)) {
+            std::cerr << "Failed to load file: " << url << std::endl;
+            return;
+        }
+    }
+
+    Node* newDoc = parseMarkup(pageSource);
+    if (!newDoc) {
+        std::cerr << "Failed to parse JSML from: " << url << std::endl;
+        return;
+    }
+
+    if (*document) {
+        destroyDom(*document);
+    }
+    *document = newDoc;
+    currentUrl = url;
+
+    shutdownScripting();
+    if (!initScripting(*document)) {
+        std::cerr << "Lua scripting re-initialization failed." << std::endl;
+    }
+    setCurrentUrl(currentUrl);
+
+    if (newDoc->properties.contains("lua") && newDoc->properties["lua"].is_string()) {
+        std::string scriptPath = newDoc->properties["lua"].get<std::string>();
+        if (!scriptPath.empty()) {
+            std::string code;
+            if (loadFileCustom(scriptPath, code)) {
+                runScript(code);
+            }
+        }
+    }
+}
+
 int main(int argc, char* argv[]) {
     std::string pageSource;
     std::string currentUrl = "default";
+    std::string urlInput = "";
+    bool urlBoxFocused = false;
+
     if (argc > 1) {
         std::string target = argv[1];
-        currentUrl = target;
+        urlInput = target;
         if (target.rfind("http://", 0) == 0 || target.rfind("https://", 0) == 0) {
-            // fetchUrl is stubbed somewhere else or not fully available
-            // but we'll try it if provided
-        } else if (!loadFileCustom(target, pageSource)) {
-            std::cerr << "Unable to load file: " << target << std::endl;
+            fetchUrl(target, pageSource);
+            currentUrl = target;
+        } else if (loadFileCustom(target, pageSource)) {
+            currentUrl = target;
         }
     }
 
@@ -79,7 +125,7 @@ int main(int argc, char* argv[]) {
 
     Node* document = parseMarkup(pageSource);
     if (!document) {
-        std::cerr << "Failed to parse page content." << std::endl;
+        std::cerr << "Failed to parse initial page content." << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -96,8 +142,6 @@ int main(int argc, char* argv[]) {
             std::string code;
             if (loadFileCustom(scriptPath, code)) {
                 runScript(code);
-            } else {
-                std::cerr << "Could not load JSML linked script: " << scriptPath << std::endl;
             }
         }
     }
@@ -118,25 +162,50 @@ int main(int argc, char* argv[]) {
             if (event.type == SDL_EVENT_QUIT) {
                 running = false;
             }
-            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE) {
-                running = false;
+            if (event.type == SDL_EVENT_KEY_DOWN) {
+                if (event.key.key == SDLK_ESCAPE) {
+                    running = false;
+                } else if (urlBoxFocused) {
+                    if (event.key.key == SDLK_BACKSPACE && !urlInput.empty()) {
+                        urlInput.pop_back();
+                    } else if (event.key.key == SDLK_RETURN || event.key.key == SDLK_KP_ENTER) {
+                        navigateTo(urlInput, &document, currentUrl);
+                        urlBoxFocused = false;
+                        SDL_StopTextInput(window);
+                    }
+                }
+            }
+            if (event.type == SDL_EVENT_TEXT_INPUT && urlBoxFocused) {
+                urlInput += event.text.text;
             }
             if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
                 float mx = event.button.x;
                 float my = event.button.y;
-                Node* hitTarget = getIntersectingNode(document, mx, my);
-                if (hitTarget) {
-                    triggerScriptClick(hitTarget->id);
+                
+                if (my < 40) {
+                    urlBoxFocused = true;
+                    SDL_StartTextInput(window);
+                } else {
+                    urlBoxFocused = false;
+                    SDL_StopTextInput(window);
+                    Node* hitTarget = getIntersectingNode(document, mx, my);
+                    if (hitTarget) {
+                        triggerScriptClick(hitTarget->id);
+                    }
                 }
             }
         }
 
         // Must re-layout before render in case updateElem was called
-        layoutNode(document, 0.0f, 0.0f, 1280.0f, 720.0f);
+        // Content area starts at y=40
+        layoutNode(document, 0.0f, 40.0f, 1280.0f, 680.0f);
 
         SDL_SetRenderDrawColor(renderer, 14, 16, 22, 255);
         SDL_RenderClear(renderer);
+        
         renderDom(renderer, document);
+        renderUrlBox(renderer, urlInput, urlBoxFocused, 1280, 40);
+        
         SDL_RenderPresent(renderer);
         SDL_Delay(16);
     }

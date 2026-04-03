@@ -14,5 +14,6 @@ TTF_Font* getFont(int ptSize);
 SDL_Point measureText(const std::string& text, int ptSize);
 
 bool initRenderer(SDL_Window** window, SDL_Renderer** renderer);
+void renderUrlBox(SDL_Renderer* renderer, const std::string& url, bool focused, int width, int height);
 void renderDom(SDL_Renderer* renderer, const Node* root);
 void shutdownRenderer();

@@ -143,6 +143,27 @@ bool initRenderer(SDL_Window** window, SDL_Renderer** renderer) {
     return true;
 }
 
+static TTF_Font* getFontForSize(int size);
+
+TTF_Font* getFont(int ptSize) {
+    return getFontForSize(ptSize);
+}
+
+SDL_Point measureText(const std::string& text, int ptSize) {
+    if (text.empty()) {
+        return {0, 0};
+    }
+    TTF_Font* font = getFontForSize(ptSize);
+    if (!font) {
+        return {0, 0};
+    }
+    int w = 0, h = 0;
+    if (TTF_GetStringSize(font, text.c_str(), text.length(), &w, &h)) {
+        return {w, h};
+    }
+    return {0, 0};
+}
+
 static TTF_Font* getFontForSize(int size) {
     if (size <= 0) {
         return g_font;
@@ -340,6 +361,44 @@ static void renderNode(SDL_Renderer* renderer, const Node* node) {
 
     for (const Node* child : node->children) {
         renderNode(renderer, child);
+    }
+}
+
+void renderUrlBox(SDL_Renderer* renderer, const std::string& url, bool focused, int width, int height) {
+    if (!renderer) return;
+
+    // Background for Chrome area
+    SDL_FRect chromeRect = {0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height)};
+    SDL_SetRenderDrawColor(renderer, 30, 32, 40, 255);
+    SDL_RenderFillRect(renderer, &chromeRect);
+
+    // URL Box border
+    SDL_FRect boxRect = {10.0f, 5.0f, static_cast<float>(width - 20), static_cast<float>(height - 10)};
+    SDL_SetRenderDrawColor(renderer, 60, 64, 80, 255);
+    SDL_RenderFillRect(renderer, &boxRect);
+    
+    if (focused) {
+        SDL_SetRenderDrawColor(renderer, 100, 150, 255, 255);
+    } else {
+        SDL_SetRenderDrawColor(renderer, 80, 84, 100, 255);
+    }
+    SDL_RenderRect(renderer, &boxRect);
+
+    // Render URL text
+    std::string displayUrl = url;
+    if (displayUrl.empty() && !focused) {
+        displayUrl = "Enter URL or file path...";
+        drawText(renderer, displayUrl, 20, 10, {120, 120, 130, 255}, 14);
+    } else {
+        drawText(renderer, displayUrl, 20, 10, {240, 240, 255, 255}, 14);
+        
+        // Render cursor if focused
+        if (focused && (SDL_GetTicks() / 500) % 2 == 0) {
+            SDL_Point size = measureText(displayUrl, 14);
+            SDL_FRect cursorRect = {22.0f + size.x, 10.0f, 2.0f, 18.0f};
+            SDL_SetRenderDrawColor(renderer, 240, 240, 255, 255);
+            SDL_RenderFillRect(renderer, &cursorRect);
+        }
     }
 }
 
