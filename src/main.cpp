@@ -106,11 +106,13 @@ int main(int argc, char* argv[]) {
     std::string pageSource;
     std::string currentUrl = "default";
     std::string urlInput = "";
+    int urlCursorPos = 0;
     bool urlBoxFocused = false;
 
     if (argc > 1) {
         std::string target = argv[1];
         urlInput = target;
+        urlCursorPos = static_cast<int>(urlInput.size());
         if (target.rfind("http://", 0) == 0 || target.rfind("https://", 0) == 0) {
             fetchUrl(target, pageSource);
             currentUrl = target;
@@ -166,25 +168,76 @@ int main(int argc, char* argv[]) {
                 if (event.key.key == SDLK_ESCAPE) {
                     running = false;
                 } else if (urlBoxFocused) {
-                    if (event.key.key == SDLK_BACKSPACE && !urlInput.empty()) {
-                        urlInput.pop_back();
+                    bool isCtrl = (event.key.mod & SDL_KMOD_CTRL) != 0;
+
+                    if (isCtrl && event.key.key == SDLK_V) {
+                        char* clip = SDL_GetClipboardText();
+                        if (clip) {
+                            std::string pasted(clip);
+                            SDL_free(clip);
+                            if (!pasted.empty()) {
+                                urlInput.insert(urlCursorPos, pasted);
+                                urlCursorPos += static_cast<int>(pasted.size());
+                            }
+                        }
+                    } else if (event.key.key == SDLK_BACKSPACE) {
+                        if (urlCursorPos > 0 && !urlInput.empty()) {
+                            urlInput.erase(urlCursorPos - 1, 1);
+                            urlCursorPos = std::max(0, urlCursorPos - 1);
+                        }
+                    } else if (event.key.key == SDLK_DELETE) {
+                        if (urlCursorPos < static_cast<int>(urlInput.size())) {
+                            urlInput.erase(urlCursorPos, 1);
+                        }
+                    } else if (event.key.key == SDLK_LEFT) {
+                        urlCursorPos = std::max(0, urlCursorPos - 1);
+                    } else if (event.key.key == SDLK_RIGHT) {
+                        urlCursorPos = std::min(static_cast<int>(urlInput.size()), urlCursorPos + 1);
+                    } else if (event.key.key == SDLK_HOME) {
+                        urlCursorPos = 0;
+                    } else if (event.key.key == SDLK_END) {
+                        urlCursorPos = static_cast<int>(urlInput.size());
                     } else if (event.key.key == SDLK_RETURN || event.key.key == SDLK_KP_ENTER) {
                         navigateTo(urlInput, &document, currentUrl);
                         urlBoxFocused = false;
                         SDL_StopTextInput(window);
                     }
+
+                    if (urlCursorPos > static_cast<int>(urlInput.size())) {
+                        urlCursorPos = static_cast<int>(urlInput.size());
+                    }
                 }
             }
             if (event.type == SDL_EVENT_TEXT_INPUT && urlBoxFocused) {
-                urlInput += event.text.text;
+                std::string text(event.text.text);
+                if (!text.empty()) {
+                    urlInput.insert(urlCursorPos, text);
+                    urlCursorPos += static_cast<int>(text.length());
+                }
             }
             if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
                 float mx = event.button.x;
                 float my = event.button.y;
-                
+
                 if (my < 40) {
                     urlBoxFocused = true;
                     SDL_StartTextInput(window);
+
+                    int relativeX = static_cast<int>(mx - 20);
+                    if (relativeX <= 0) {
+                        urlCursorPos = 0;
+                    } else {
+                        urlCursorPos = static_cast<int>(urlInput.size());
+                        int closest = 0;
+                        for (int i = 0; i <= static_cast<int>(urlInput.size()); ++i) {
+                            SDL_Point sz = measureText(urlInput.substr(0, i), 14);
+                            if (sz.x > relativeX) {
+                                break;
+                            }
+                            closest = i;
+                        }
+                        urlCursorPos = closest;
+                    }
                 } else {
                     urlBoxFocused = false;
                     SDL_StopTextInput(window);
@@ -204,7 +257,7 @@ int main(int argc, char* argv[]) {
         SDL_RenderClear(renderer);
         
         renderDom(renderer, document);
-        renderUrlBox(renderer, urlInput, urlBoxFocused, 1280, 40);
+        renderUrlBox(renderer, urlInput, urlBoxFocused, 1280, 40, urlCursorPos);
         
         SDL_RenderPresent(renderer);
         SDL_Delay(16);

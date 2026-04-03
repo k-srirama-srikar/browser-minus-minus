@@ -364,7 +364,7 @@ static void renderNode(SDL_Renderer* renderer, const Node* node) {
     }
 }
 
-void renderUrlBox(SDL_Renderer* renderer, const std::string& url, bool focused, int width, int height) {
+void renderUrlBox(SDL_Renderer* renderer, const std::string& url, bool focused, int width, int height, int cursorPosition) {
     if (!renderer) return;
 
     // Background for Chrome area
@@ -391,11 +391,13 @@ void renderUrlBox(SDL_Renderer* renderer, const std::string& url, bool focused, 
         drawText(renderer, displayUrl, 20, 10, {120, 120, 130, 255}, 14);
     } else {
         drawText(renderer, displayUrl, 20, 10, {240, 240, 255, 255}, 14);
-        
+
         // Render cursor if focused
         if (focused && (SDL_GetTicks() / 500) % 2 == 0) {
-            SDL_Point size = measureText(displayUrl, 14);
-            SDL_FRect cursorRect = {22.0f + size.x, 10.0f, 2.0f, 18.0f};
+            int cursorPos = std::clamp(cursorPosition, 0, static_cast<int>(displayUrl.size()));
+            std::string prefix = displayUrl.substr(0, cursorPos);
+            SDL_Point prefixSize = measureText(prefix, 14);
+            SDL_FRect cursorRect = {20.0f + static_cast<float>(prefixSize.x), 10.0f, 2.0f, 18.0f};
             SDL_SetRenderDrawColor(renderer, 240, 240, 255, 255);
             SDL_RenderFillRect(renderer, &cursorRect);
         }
