@@ -29,6 +29,8 @@ endif()
 pkg_check_modules(SDL3_ttf QUIET IMPORTED_TARGET sdl3-ttf)
 if (NOT SDL3_ttf_FOUND)
     message(STATUS "SDL3_ttf not found directly, fetching from GitHub...")
+    # Vendor Freetype & Harfbuzz so we don't need system installs
+    set(SDLTTF_VENDORED ON CACHE BOOL "" FORCE)
     FetchContent_Declare(
         SDL3_ttf
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
@@ -41,7 +43,14 @@ endif()
 # Try to find SDL3_image locally for runtime image formats
 pkg_check_modules(SDL3_image QUIET IMPORTED_TARGET sdl3-image)
 if (NOT SDL3_image_FOUND)
-    message(STATUS "SDL3_image not found; image support disabled.")
+    message(STATUS "SDL3_image not found locally, fetching from GitHub...")
+    FetchContent_Declare(
+        SDL3_image
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+        GIT_TAG release-3.2.0
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(SDL3_image)
 endif()
 
 # Include external and local headers
@@ -51,6 +60,9 @@ if(sdl3_SOURCE_DIR)
 endif()
 if(sdl3_ttf_SOURCE_DIR)
     include_directories(${sdl3_ttf_SOURCE_DIR}/include)
+endif()
+if(sdl3_image_SOURCE_DIR)
+    include_directories(${sdl3_image_SOURCE_DIR}/include)
 endif()
 
 # Source files
@@ -87,13 +99,20 @@ target_link_libraries(browser
     pthread
 )
 
-# Optionally link SDL3_image if available
-if(TARGET PkgConfig::SDL3_image)
-    target_link_libraries(browser PkgConfig::SDL3_image)
-    target_compile_definitions(browser PRIVATE HAS_SDL3_IMAGE=1)
-elseif(SDL3_image_FOUND)
-    # SDL3_image was found by pkg-config, but imported target is missing; fail-safe.
-    message(WARNING "SDL3_image found by pkg-config but PkgConfig::SDL3_image target is unavailable. Image support will be disabled.")
-else()
-    message(STATUS "SDL3_image not found; image support disabled.")
+# Conditional linking for SDL3_image depending on how it was found
+if (TARGET PkgConfig::SDL3_image)
+    set(SDL3_IMAGE_LINK_TARGET PkgConfig::SDL3_image)
+elseif(TARGET SDL3_image-shared)
+    set(SDL3_IMAGE_LINK_TARGET SDL3_image-shared)
+elseif(TARGET SDL3_image::SDL3_image)
+    set(SDL3_IMAGE_LINK_TARGET SDL3_image::SDL3_image)
+elseif(TARGET SDL3_image)
+    set(SDL3_IMAGE_LINK_TARGET SDL3_image)
 endif()
+
+if(SDL3_IMAGE_LINK_TARGET)
+    target_link_libraries(browser ${SDL3_IMAGE_LINK_TARGET})
+    target_compile_definitions(browser PRIVATE HAS_SDL3_IMAGE=1)
+else()
+    message(STATUS "SDL3_image target not available; image support disabled.")
+ endif()
