@@ -18,5 +18,5 @@ void renderUrlBox(SDL_Renderer* renderer, const std::string& url, bool focused, 
 void renderTabBar(SDL_Renderer* renderer, class TabManager& tabManager, int activeTabId, int windowWidth);
 int getTabAtPosition(float x, float y);
 int getCloseButtonTabAtPosition(float x, float y);
-void renderDom(SDL_Renderer* renderer, const Node* root);
+void renderDom(SDL_Renderer* renderer, const Node* root, const std::string& baseUrl);
 void shutdownRenderer();

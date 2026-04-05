@@ -8,6 +8,7 @@
 #include <fstream>
 #include "tab.hpp"
 #include <SDL3_ttf/SDL_ttf.h>
+#include "url_utils.hpp"
 
 #ifdef HAS_SDL3_IMAGE
 #include <SDL3_image/SDL_image.h>
@@ -341,7 +342,7 @@ static std::string getNodeText(const Node* node) {
     return "";
 }
 
-static void renderNode(SDL_Renderer* renderer, const Node* node) {
+static void renderNode(SDL_Renderer* renderer, const Node* node, const std::string& baseUrl) {
     if (node->type == NodeType::Root) {
         // Only draw the background in the viewport area.
         // Screen clearing is handled in main.cpp.
@@ -363,7 +364,8 @@ static void renderNode(SDL_Renderer* renderer, const Node* node) {
             }
             if (node->properties["image"].contains("url") && node->properties["image"]["url"].is_string()) {
                 imageUrl = node->properties["image"]["url"].get<std::string>();
-                imageTexture = loadImageTexture(imageUrl);
+                std::string resolvedImageUrl = UrlUtils::resolvePath(baseUrl, imageUrl);
+                imageTexture = loadImageTexture(resolvedImageUrl);
             }
         }
         
@@ -392,7 +394,7 @@ static void renderNode(SDL_Renderer* renderer, const Node* node) {
     }
 
     for (const Node* child : node->children) {
-        renderNode(renderer, child);
+        renderNode(renderer, child, baseUrl);
     }
 }
 
@@ -420,28 +422,41 @@ void renderUrlBox(SDL_Renderer* renderer, const std::string& url, bool focused, 
     SDL_Color boxBorder = focused ? SDL_Color{100, 150, 255, 255} : SDL_Color{60, 64, 67, 255};
     drawSquaredBox(renderer, boxX, boxY, boxW, boxH, boxBg, boxBorder, true);
 
-    // Render URL text
+    // Set clipping viewport for text scrolling
+    SDL_Rect prevViewport;
+    SDL_GetRenderViewport(renderer, &prevViewport);
+    SDL_Rect urlViewport = {(int)boxX + 5, (int)boxY, (int)boxW - 10, (int)boxH};
+    SDL_SetRenderViewport(renderer, &urlViewport);
+
+    // Render URL text with scrolling
     std::string displayUrl = url;
-    float textX = boxX + 15.0f;
-    float textY = boxY + (boxH - 18.0f) / 2.0f;
+    float textX = 10.0f; // Relative to viewport
+    float textY = (boxH - 18.0f) / 2.0f;
+
+    SDL_Point totalSize = measureText(displayUrl, 14);
+    int cursorX = measureText(displayUrl.substr(0, cursorPosition), 14).x;
+    
+    float scrollOffset = 0;
+    if (cursorX > boxW - 40) {
+        scrollOffset = cursorX - (boxW - 40);
+    }
 
     if (displayUrl.empty() && !focused) {
         displayUrl = "Search or enter address";
         drawText(renderer, displayUrl, (int)textX, (int)textY, {120, 120, 130, 255}, 14);
     } else {
-        drawText(renderer, displayUrl, (int)textX, (int)textY, {230, 230, 235, 255}, 14);
+        drawText(renderer, displayUrl, (int)(textX - scrollOffset), (int)textY, {230, 230, 235, 255}, 14);
 
         // Render cursor if focused
         if (focused && (SDL_GetTicks() / 500) % 2 == 0) {
-            int cursorPos = std::clamp(cursorPosition, 0, static_cast<int>(displayUrl.size()));
-            std::string prefix = displayUrl.substr(0, cursorPos);
-            SDL_Point prefixSize = measureText(prefix, 14);
-            
-            SDL_FRect cursorRect = {textX + static_cast<float>(prefixSize.x), textY + 1.0f, 2.0f, 16.0f};
+            SDL_FRect cursorRect = {textX + (float)cursorX - scrollOffset, textY + 1.0f, 2.0f, 16.0f};
             SDL_SetRenderDrawColor(renderer, 100, 150, 255, 255);
             SDL_RenderFillRect(renderer, &cursorRect);
         }
     }
+    
+    // Restore viewport
+    SDL_SetRenderViewport(renderer, &prevViewport);
 }
 
 void renderTabBar(SDL_Renderer* renderer, TabManager& tabManager, 
@@ -553,7 +568,7 @@ int getCloseButtonTabAtPosition(float x, float y) {
     return -1;
 }
 
-void renderDom(SDL_Renderer* renderer, const Node* root) {
+void renderDom(SDL_Renderer* renderer, const Node* root, const std::string& baseUrl) {
     if (!renderer) return;
 
     if (!root) {
@@ -576,5 +591,5 @@ void renderDom(SDL_Renderer* renderer, const Node* root) {
         drawText(renderer, subtext, centerX - (sSize.x / 2), centerY + 10, {150, 150, 160, 255}, 14);
         return;
     }
-    renderNode(renderer, root);
+    renderNode(renderer, root, baseUrl);
 }

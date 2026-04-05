@@ -12,6 +12,7 @@ class Tab {
 private:
     int tabId;
     std::string url;
+    std::string baseUrl;
     Node* domRoot;  // Private DOM tree for this tab
     std::unique_ptr<sol::state> luaState;  // Isolated Lua environment
     TripleBuffer<RenderCommand> renderTripleBuffer;  // Thread-safe render tree passing
@@ -26,6 +27,7 @@ public:
     // Getters
     int getId() const { return tabId; }
     const std::string& getUrl() const { return url; }
+    const std::string& getBaseUrl() const { return baseUrl; }
     Node* getDomRoot() const { return domRoot; }
     sol::state* getLuaState() { return luaState.get(); }
     TripleBuffer<RenderCommand>& getRenderBuffer() { return renderTripleBuffer; }
@@ -36,6 +38,7 @@ public:
     
     // URL management
     void setUrl(const std::string& newUrl) { url = newUrl; }
+    void setBaseUrl(const std::string& newBase) { baseUrl = newBase; }
     
     // Lua integration
     bool initializeLua();

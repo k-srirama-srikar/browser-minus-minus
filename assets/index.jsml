@@ -1,5 +1,5 @@
 {
-  "lua": "assets/script.lua",
+  "lua": "script.lua",
   "root": {
     "flexv": [
       {

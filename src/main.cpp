@@ -291,7 +291,7 @@ int main(int argc, char* argv[]) {
         
         // Render active tab's DOM
         if (activeTab && activeTab->getDomRoot()) {
-            renderDom(renderer, activeTab->getDomRoot());
+            renderDom(renderer, activeTab->getDomRoot(), activeTab->getBaseUrl());
         }
         
         SDL_RenderPresent(renderer);

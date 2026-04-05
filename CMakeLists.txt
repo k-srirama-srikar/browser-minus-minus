@@ -62,6 +62,7 @@ set(SOURCES
     src/scripting.cpp
     src/network.cpp
     src/tab.cpp
+    src/url_utils.cpp
 )
 
 add_executable(browser ${SOURCES})

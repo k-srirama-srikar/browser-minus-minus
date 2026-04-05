@@ -1,5 +1,5 @@
 {
-  "lua": "assets/test2.lua",
+  "lua": "test2.lua",
   "root": {
     "flexv": [
       {
@@ -156,7 +156,7 @@
       },
       {
         "image": {
-          "url": "/home/srisri/Desktop/Srikar/Work/sp26/technitium/browser++/assets/cat.png",
+          "url": "cat.png",
           "alttext": "A sample image for rendering tests"
         },
         "tag": "hero-image",

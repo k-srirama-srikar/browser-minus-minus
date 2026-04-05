@@ -1,6 +1,7 @@
 #include "tab.hpp"
 #include "network.hpp"
 #include "layout.hpp"
+#include "url_utils.hpp"
 #include <iostream>
 #include <chrono>
 
@@ -60,7 +61,6 @@ static const char* defaultMarkup = R"JSON(
 
 Tab::Tab(int id, const std::string& initialUrl)
     : tabId(id), url(initialUrl), domRoot(nullptr) {
-    luaState = std::make_unique<sol::state>();
 }
 
 Tab::~Tab() {
@@ -84,7 +84,7 @@ void Tab::clearDom() {
 
 bool Tab::initializeLua() {
     if (!luaState) {
-        return false;
+        luaState = std::make_unique<sol::state>();
     }
     
     try {
@@ -240,13 +240,14 @@ bool Tab::initializeLua() {
         });
         
         browser.set_function("fetch", [thisTab](const std::string& urlStr, sol::function callback) {
+            std::string resolvedUrl = UrlUtils::isNetworkUrl(urlStr) ? urlStr : UrlUtils::resolvePath(thisTab->baseUrl, urlStr);
             std::string response;
             bool success = false;
             
-            if (urlStr.rfind("http://", 0) == 0 || urlStr.rfind("https://", 0) == 0) {
-                success = fetchUrl(urlStr, response);
+            if (UrlUtils::isNetworkUrl(resolvedUrl)) {
+                success = fetchUrl(resolvedUrl, response);
             } else {
-                success = loadFile(urlStr, response);
+                success = loadFile(resolvedUrl, response);
             }
             
             sol::object arg;
@@ -482,7 +483,10 @@ bool TabManager::loadTab(Tab* tab, const std::string& url) {
     
     tab->setDomRoot(newRoot);
     tab->setUrl(url);
+    tab->setBaseUrl(UrlUtils::getBaseUrl(url));
     
+    // Always start with a fresh Lua environment for a new page
+    tab->shutdownLua();
     if (!tab->initializeLua()) {
         std::cerr << "Failed to initialize Lua for tab" << std::endl;
         return false;
@@ -490,11 +494,13 @@ bool TabManager::loadTab(Tab* tab, const std::string& url) {
     
     if (newRoot->properties.contains("lua") && newRoot->properties["lua"].is_string()) {
         std::string scriptPath = newRoot->properties["lua"].get<std::string>();
-        if (!scriptPath.empty()) {
-            std::string code;
-            if (loadFile(scriptPath, code)) {
-                tab->runScript(code);
-            }
+        if (!scriptPath.size()) return true;
+        
+        std::string resolvedScript = UrlUtils::resolvePath(tab->getBaseUrl(), scriptPath);
+        std::string code;
+        bool loaded = UrlUtils::isNetworkUrl(resolvedScript) ? fetchUrl(resolvedScript, code) : loadFile(resolvedScript, code);
+        if (loaded) {
+            tab->runScript(code);
         }
     }
     
@@ -503,41 +509,5 @@ bool TabManager::loadTab(Tab* tab, const std::string& url) {
 
 void TabManager::navigateTab(Tab* tab, const std::string& url) {
     if (!tab) return;
-    
-    std::string pageSource;
-    if (url.rfind("http://", 0) == 0 || url.rfind("https://", 0) == 0) {
-        if (!fetchUrl(url, pageSource)) {
-            std::cerr << "Failed to fetch URL: " << url << std::endl;
-            return;
-        }
-    } else {
-        if (!loadFile(url, pageSource)) {
-            std::cerr << "Failed to load file: " << url << std::endl;
-            return;
-        }
-    }
-
-    Node* newDoc = parseMarkup(pageSource);
-    if (!newDoc) {
-        std::cerr << "Failed to parse JSML from: " << url << std::endl;
-        return;
-    }
-
-    tab->setDomRoot(newDoc);
-    tab->setUrl(url);
-
-    tab->shutdownLua();
-    if (!tab->initializeLua()) {
-        std::cerr << "Lua re-initialization failed." << std::endl;
-    }
-
-    if (newDoc->properties.contains("lua") && newDoc->properties["lua"].is_string()) {
-        std::string scriptPath = newDoc->properties["lua"].get<std::string>();
-        if (!scriptPath.empty()) {
-            std::string code;
-            if (loadFile(scriptPath, code)) {
-                tab->runScript(code);
-            }
-        }
-    }
+    loadTab(tab, url);
 }
