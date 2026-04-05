@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
     TabManager tabManager;
     
     // Determine initial URL
-    std::string initialUrl = "assets/index.jsml";
+    std::string initialUrl = "";
     if (argc > 1) {
         initialUrl = argv[1];
     }
@@ -48,9 +48,11 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
     
-    // Load content into first tab
-    if (!tabManager.loadTab(activeTab, initialUrl)) {
-        std::cerr << "Failed to load initial content" << std::endl;
+    // Load content into first tab (if not empty)
+    if (!initialUrl.empty()) {
+        if (!tabManager.loadTab(activeTab, initialUrl)) {
+            std::cerr << "Failed to load initial content" << std::endl;
+        }
     }
     
     // URL bar state
@@ -91,12 +93,11 @@ int main(int argc, char* argv[]) {
                 if (isCtrl) {
                     if (event.key.key == SDLK_T) {
                         // Ctrl+T: New tab
-                        Tab* newTab = tabManager.createTab("assets/index.jsml");
+                        Tab* newTab = tabManager.createTab("");
                         if (newTab) {
-                            tabManager.loadTab(newTab, "assets/index.jsml");
                             activeTab = newTab;
-                            urlInput = "assets/index.jsml";
-                            urlCursorPos = static_cast<int>(urlInput.size());
+                            urlInput = "";
+                            urlCursorPos = 0;
                             urlBoxFocused = false;
                             if (window) SDL_StopTextInput(window);
                         }
@@ -216,12 +217,11 @@ int main(int argc, char* argv[]) {
                             int clickedTabId = getTabAtPosition(mx, my);
                             if (clickedTabId == -99) {
                                 // Special ID for plus button
-                                Tab* newTab = tabManager.createTab("assets/index.jsml");
+                                Tab* newTab = tabManager.createTab("");
                                 if (newTab) {
-                                    tabManager.loadTab(newTab, "assets/index.jsml");
                                     activeTab = newTab;
-                                    urlInput = "assets/index.jsml";
-                                    urlCursorPos = static_cast<int>(urlInput.size());
+                                    urlInput = "";
+                                    urlCursorPos = 0;
                                 }
                             } else if (clickedTabId >= 0) {
                                 // Switch to clicked tab

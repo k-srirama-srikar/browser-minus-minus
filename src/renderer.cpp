@@ -273,39 +273,17 @@ void shutdownRenderer() {
     SDL_Quit();
 }
 
-static void drawRoundedRect(SDL_Renderer* renderer, float x, float y, float w, float h, float radius, SDL_Color color, bool fill) {
-    if (radius <= 0.0f) {
-        SDL_FRect rect = {x, y, w, h};
-        SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-        if (fill) SDL_RenderFillRect(renderer, &rect);
-        else SDL_RenderRect(renderer, &rect);
-        return;
-    }
-
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+static void drawSquaredBox(SDL_Renderer* renderer, float x, float y, float w, float h, SDL_Color bgColor, SDL_Color borderColor, bool hasBorder) {
+    SDL_FRect rect = {x, y, w, h};
     
-    if (fill) {
-        // Center part
-        SDL_FRect center = {x + radius, y, w - 2 * radius, h};
-        SDL_RenderFillRect(renderer, &center);
-        // Left part
-        SDL_FRect left = {x, y + radius, radius, h - 2 * radius};
-        SDL_RenderFillRect(renderer, &left);
-        // Right part
-        SDL_FRect right = {x + w - radius, y + radius, radius, h - 2 * radius};
-        SDL_RenderFillRect(renderer, &right);
-        
-        // Corners: draw points for simplicity or use a circle algorithm
-        // For a high-performance browser, we'd use a shader or pre-rendered textures.
-        // Here we'll just fill the corners with small rects for a "pixelated" rounded look if radius is small,
-        // or just accept slightly squared corners for now to keep it simple and fast.
-        // Actually, let's just use 4 rectangles for the main body and 4 small ones for corners.
-    } else {
-        // Just draw lines for the border
-        SDL_RenderLine(renderer, x + radius, y, x + w - radius, y);
-        SDL_RenderLine(renderer, x + radius, y + h, x + w - radius, y + h);
-        SDL_RenderLine(renderer, x, y + radius, x, y + h - radius);
-        SDL_RenderLine(renderer, x + w, y + radius, x + w, y + h - radius);
+    // Fill background
+    SDL_SetRenderDrawColor(renderer, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
+    SDL_RenderFillRect(renderer, &rect);
+    
+    // Draw border in a single pass
+    if (hasBorder) {
+        SDL_SetRenderDrawColor(renderer, borderColor.r, borderColor.g, borderColor.b, borderColor.a);
+        SDL_RenderRect(renderer, &rect);
     }
 }
 
@@ -430,45 +408,37 @@ void renderUrlBox(SDL_Renderer* renderer, const std::string& url, bool focused, 
     SDL_SetRenderDrawColor(renderer, 60, 64, 67, 255);
     SDL_RenderLine(renderer, 0, (float)yOffset, (float)width, (float)yOffset);
 
-    // URL Box border/background (Pill shape)
+    // URL Box background and border in a single pass (Squared edges)
     float boxMarginX = 80.0f;
-    float boxMarginY = 6.0f;
+    float boxMarginY = 7.0f;
     float boxX = boxMarginX;
     float boxY = (float)yOffset + boxMarginY;
     float boxW = (float)width - 2 * boxMarginX;
     float boxH = (float)height - 2 * boxMarginY;
     
-    // Draw the pill background
-    SDL_Color boxColor = {41, 42, 45, 255}; // Darker inset
-    drawRoundedRect(renderer, boxX, boxY, boxW, boxH, boxH / 2.0f, boxColor, true);
-    
-    // Draw focus/hover border
-    if (focused) {
-        SDL_SetRenderDrawColor(renderer, 138, 180, 248, 255); // Chrome blue
-        drawRoundedRect(renderer, boxX - 1, boxY - 1, boxW + 2, boxH + 2, (boxH + 2) / 2.0f, {138, 180, 248, 255}, false);
-    } else {
-        SDL_SetRenderDrawColor(renderer, 95, 99, 104, 255); // Mid gray
-        drawRoundedRect(renderer, boxX, boxY, boxW, boxH, boxH / 2.0f, {95, 99, 104, 255}, false);
-    }
+    SDL_Color boxBg = {30, 31, 34, 255};
+    SDL_Color boxBorder = focused ? SDL_Color{100, 150, 255, 255} : SDL_Color{60, 64, 67, 255};
+    drawSquaredBox(renderer, boxX, boxY, boxW, boxH, boxBg, boxBorder, true);
 
     // Render URL text
     std::string displayUrl = url;
-    float textX = boxX + 20.0f;
+    float textX = boxX + 15.0f;
     float textY = boxY + (boxH - 18.0f) / 2.0f;
 
     if (displayUrl.empty() && !focused) {
         displayUrl = "Search or enter address";
-        drawText(renderer, displayUrl, (int)textX, (int)textY, {154, 160, 166, 255}, 14);
+        drawText(renderer, displayUrl, (int)textX, (int)textY, {120, 120, 130, 255}, 14);
     } else {
-        drawText(renderer, displayUrl, (int)textX, (int)textY, {232, 234, 237, 255}, 14);
+        drawText(renderer, displayUrl, (int)textX, (int)textY, {230, 230, 235, 255}, 14);
 
         // Render cursor if focused
         if (focused && (SDL_GetTicks() / 500) % 2 == 0) {
             int cursorPos = std::clamp(cursorPosition, 0, static_cast<int>(displayUrl.size()));
             std::string prefix = displayUrl.substr(0, cursorPos);
             SDL_Point prefixSize = measureText(prefix, 14);
-            SDL_FRect cursorRect = {textX + static_cast<float>(prefixSize.x), textY + 2, 2.0f, boxH - 10};
-            SDL_SetRenderDrawColor(renderer, 138, 180, 248, 255);
+            
+            SDL_FRect cursorRect = {textX + static_cast<float>(prefixSize.x), textY + 1.0f, 2.0f, 16.0f};
+            SDL_SetRenderDrawColor(renderer, 100, 150, 255, 255);
             SDL_RenderFillRect(renderer, &cursorRect);
         }
     }
@@ -499,32 +469,26 @@ void renderTabBar(SDL_Renderer* renderer, TabManager& tabManager,
         bool isActive = (tabId == activeTabId);
         
         float tabX = static_cast<float>(x);
-        float tabY = 8.0f; // Padding from top
+        float tabY = 8.0f; // Standard top margin
         float tabW = static_cast<float>(TAB_WIDTH);
-        float tabH = static_cast<float>(TAB_HEIGHT - 8);
+        float tabH = static_cast<float>(TAB_HEIGHT - 6);
         
         SDL_FRect tabRect = {tabX, tabY, tabW, tabH};
         
-        // Tab shape: Rounded top corners
-        SDL_Color tabColor = isActive ? SDL_Color{53, 54, 58, 255} : SDL_Color{41, 42, 45, 255};
+        // Tab shape: Squared edges, merged pass
+        SDL_Color tabBg = isActive ? SDL_Color{30, 31, 34, 255} : SDL_Color{40, 42, 45, 255};
+        SDL_Color tabBorder = isActive ? SDL_Color{100, 150, 255, 255} : SDL_Color{50, 52, 55, 255};
         
-        // Draw rounded tab
-        drawRoundedRect(renderer, tabX, tabY, tabW, tabH, 8.0f, tabColor, true);
+        drawSquaredBox(renderer, tabX, tabY, tabW, tabH, tabBg, tabBorder, true);
         
         if (isActive) {
-            // Subtle top highlight for active tab
-            SDL_FRect topHighlight = {tabX + 8, tabY, tabW - 16, 2};
-            SDL_SetRenderDrawColor(renderer, 138, 180, 248, 255); // Chrome blue
-            SDL_RenderFillRect(renderer, &topHighlight);
-        } else {
-            // Draw a subtle separator if not active and not first
-            if (x > 8) {
-                SDL_SetRenderDrawColor(renderer, 60, 64, 67, 255);
-                SDL_RenderLine(renderer, tabX - 1, tabY + 8, tabX - 1, tabY + tabH - 8);
-            }
+            // Precise top accent
+            SDL_FRect accent = {tabX, tabY, tabW, 3};
+            SDL_SetRenderDrawColor(renderer, 100, 150, 255, 255);
+            SDL_RenderFillRect(renderer, &accent);
         }
         
-        // Label (Tab Title/URL)
+        // Label
         std::string label = tab->getUrl();
         if (label.empty()) label = "New Tab";
         else {
@@ -535,34 +499,36 @@ void renderTabBar(SDL_Renderer* renderer, TabManager& tabManager,
         }
         if (label.length() > 20) label = label.substr(0, 17) + "...";
         
-        SDL_Color textColor = isActive ? SDL_Color{232, 234, 237, 255} : SDL_Color{154, 160, 166, 255};
-        drawText(renderer, label, (int)tabX + 12, (int)tabY + 8, textColor, 13);
+        SDL_Color textColor = isActive ? SDL_Color{230, 230, 235, 255} : SDL_Color{140, 145, 150, 255};
+        drawText(renderer, label, (int)tabX + 12, (int)tabY + 10, textColor, 13);
         
-        // Close button (x) - only show on active tab or hover (simplified to always for now)
+        // Close button (Merged square component)
         float cx = tabX + tabW - 24;
         float cy = tabY + (tabH - CLOSE_BUTTON_SIZE) / 2;
         SDL_FRect closeRect = {cx, cy, (float)CLOSE_BUTTON_SIZE, (float)CLOSE_BUTTON_SIZE};
         g_closeRects.push_back({tabId, closeRect});
         
-        // Draw 'x' with a circle background on active
         if (isActive) {
-            drawRoundedRect(renderer, cx - 2, cy - 2, CLOSE_BUTTON_SIZE + 4, CLOSE_BUTTON_SIZE + 4, 10.0f, {72, 75, 78, 255}, true);
+            drawSquaredBox(renderer, cx - 2, cy - 2, CLOSE_BUTTON_SIZE + 4, CLOSE_BUTTON_SIZE + 4, {60, 63, 66, 255}, {80, 83, 86, 255}, false);
         }
-        drawText(renderer, "x", (int)cx + 4, (int)cy - 1, {180, 180, 180, 255}, 12);
+        
+        SDL_Point xSize = measureText("x", 12);
+        float xOff = (CLOSE_BUTTON_SIZE - xSize.x) / 2.0f;
+        float yOff = (CLOSE_BUTTON_SIZE - xSize.y) / 2.0f;
+        drawText(renderer, "x", (int)cx + (int)xOff - 1, (int)cy + (int)yOff - 2, {180, 180, 180, 255}, 10);
         
         g_tabRects.push_back({tabId, tabRect});
         x += TAB_WIDTH + TAB_SPACING;
     }
     
-    // "+" button (New Tab)
-    float plusX = (float)x + 8;
+    // "+" button (Squared)
+    float plusX = (float)x + 10;
     float plusY = 12.0f;
     float plusSize = 24.0f;
     SDL_FRect plusRect = {plusX, plusY, plusSize, plusSize};
     
-    // Draw stylish circular plus button
-    drawRoundedRect(renderer, plusX, plusY, plusSize, plusSize, 12.0f, {60, 64, 67, 255}, true);
-    drawText(renderer, "+", (int)plusX + 7, (int)plusY + 1, {218, 220, 224, 255}, 18);
+    drawSquaredBox(renderer, plusX, plusY, plusSize, plusSize, {60, 63, 66, 255}, {80, 83, 86, 255}, true);
+    drawText(renderer, "+", (int)plusX + 7, (int)plusY + 1, {220, 220, 225, 255}, 18);
     
     g_tabRects.push_back({-99, plusRect}); 
 }
@@ -588,7 +554,26 @@ int getCloseButtonTabAtPosition(float x, float y) {
 }
 
 void renderDom(SDL_Renderer* renderer, const Node* root) {
-    if (!renderer || !root) {
+    if (!renderer) return;
+
+    if (!root) {
+        // Render a minimalist squared welcome screen
+        SDL_FRect viewport = {0, 90, 1280, 630}; 
+        SDL_SetRenderDrawColor(renderer, 18, 18, 18, 255);
+        SDL_RenderFillRect(renderer, &viewport);
+        
+        // Centered Welcome Text
+        std::string welcome = "Welcome to Technitium Aether";
+        std::string subtext = "Type a URL or file path in the address bar above to begin.";
+        
+        SDL_Point wSize = measureText(welcome, 28);
+        SDL_Point sSize = measureText(subtext, 14);
+        
+        int centerX = 1280 / 2;
+        int centerY = 90 + (630 / 2);
+        
+        drawText(renderer, welcome, centerX - (wSize.x / 2), centerY - 40, {245, 245, 250, 255}, 28);
+        drawText(renderer, subtext, centerX - (sSize.x / 2), centerY + 10, {150, 150, 160, 255}, 14);
         return;
     }
     renderNode(renderer, root);
