@@ -237,3 +237,149 @@ void runScript(const std::string& code) {
         std::cerr << "Lua script eval error: " << e.what() << std::endl;
     }
 }
+
+// ============================================================================
+// Tab-aware scripting API
+// ============================================================================
+
+#include "tab.hpp"
+
+bool initTabScripting(Tab* tab, int screenWidth, int screenHeight) {
+    if (!tab) return false;
+    
+    if (!tab->initializeLua()) {
+        return false;
+    }
+    
+    sol::state* luaState = tab->getLuaState();
+    if (!luaState) return false;
+    
+    Node* domRoot = tab->getDomRoot();
+    const std::string& currentUrl = tab->getUrl();
+    
+    try {
+        sol::table browser = luaState->create_table("browser");
+        
+        browser.set_function("log", [](const std::string& msg) {
+            std::cout << "[Lua Log] " << msg << std::endl;
+        });
+        
+        browser.set_function("getTime", []() -> double {
+            return static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count());
+        });
+        
+        browser.set_function("getCurrentUrl", [tab]() {
+            return tab->getUrl();
+        });
+        
+        browser.set_function("getScreenSize", [screenWidth, screenHeight, luaState]() {
+            sol::table result = luaState->create_table();
+            result[1] = screenWidth;
+            result[2] = screenHeight;
+            return result;
+        });
+        
+        browser.set_function("getElemRect", [domRoot, luaState](int id) -> sol::object {
+            Node* node = findNodeByIdRecursive(domRoot, id);
+            if (!node) return sol::nil;
+            sol::table rect = luaState->create_table();
+            rect[1] = node->x;
+            rect[2] = node->y;
+            rect[3] = node->width;
+            rect[4] = node->height;
+            return rect;
+        });
+        
+        browser.set_function("fetch", [luaState](const std::string& url, sol::function callback) {
+            std::string normalized = normalizeFetchPath(url);
+            std::string response;
+            bool success = false;
+            if (normalized.rfind("http://", 0) == 0 || normalized.rfind("https://", 0) == 0) {
+                success = fetchUrl(normalized, response);
+            } else {
+                success = loadFile(normalized, response);
+            }
+            
+            sol::object arg = sol::nil;
+            if (success) {
+                try {
+                    auto json = nlohmann::json::parse(response);
+                    arg = jsonToLua(json, *luaState);
+                } catch (...) {
+                    arg = sol::make_object(*luaState, response);
+                }
+            }
+            
+            try {
+                callback(arg);
+            } catch (const sol::error& e) {
+                std::cerr << "Lua fetch callback error: " << e.what() << std::endl;
+            }
+        });
+        
+        browser.set_function("getElemsByTag", [domRoot, luaState](const std::string& tag) {
+            std::vector<int> ids;
+            findNodesByTagRecursive(domRoot, tag, ids);
+            sol::table result = luaState->create_table();
+            for (size_t i = 0; i < ids.size(); ++i) {
+                result[i + 1] = ids[i];
+            }
+            return result;
+        });
+        
+        browser.set_function("getElem", [domRoot, luaState](int id) -> sol::object {
+            Node* node = findNodeByIdRecursive(domRoot, id);
+            if (!node) return sol::nil;
+            return jsonToLua(node->properties, *luaState);
+        });
+        
+        browser.set_function("updateElem", [domRoot](int id, sol::object properties) {
+            Node* node = findNodeByIdRecursive(domRoot, id);
+            if (!node) return;
+            node->properties = luaToJson(properties);
+        });
+        
+        browser.set_function("on", [tab](int nodeId, const std::string& eventType, sol::function handler) {
+            if (eventType == "click") {
+                tab->registerClickHandler(nodeId, handler);
+            }
+        });
+        
+        return true;
+    } catch (const std::exception& e) {
+        std::cerr << "Failed to initialize tab scripting: " << e.what() << std::endl;
+        return false;
+    }
+}
+
+void shutdownTabScripting(Tab* tab) {
+    if (!tab) return;
+    tab->shutdownLua();
+}
+
+void runTabScript(Tab* tab, const std::string& code) {
+    if (!tab || code.empty()) return;
+    tab->runScript(code);
+}
+
+void triggerTabScriptClick(Tab* tab, int nodeId) {
+    if (!tab) return;
+    tab->triggerClick(nodeId);
+}
+
+void setTabScreenSize(Tab* tab, int width, int height) {
+    if (!tab) return;
+    sol::state* lua = tab->getLuaState();
+    if (!lua) return;
+    
+    try {
+        sol::table browser = (*lua)["browser"];
+        if (browser.valid()) {
+            browser["screenWidth"] = width;
+            browser["screenHeight"] = height;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error setting screen size for tab: " << e.what() << std::endl;
+    }
+}
