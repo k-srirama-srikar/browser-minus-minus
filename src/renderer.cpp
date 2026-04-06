@@ -198,6 +198,9 @@ static SDL_Color parseHexColor(const std::string& text, SDL_Color fallback) {
     if (text.size() == 7) {
         return { static_cast<Uint8>((value >> 16) & 0xFF), static_cast<Uint8>((value >> 8) & 0xFF), static_cast<Uint8>(value & 0xFF), 255 };
     }
+    if (text.size() == 8) { // Handle 7 hex digits (rare but in docs)
+        return { static_cast<Uint8>((value >> 16) & 0xFF), static_cast<Uint8>((value >> 8) & 0xFF), static_cast<Uint8>(value & 0xFF), 255 };
+    }
     if (text.size() == 9) {
         return { static_cast<Uint8>((value >> 24) & 0xFF), static_cast<Uint8>((value >> 16) & 0xFF), static_cast<Uint8>((value >> 8) & 0xFF), static_cast<Uint8>(value & 0xFF) };
     }
@@ -314,14 +317,15 @@ static void drawRectangle(SDL_Renderer* renderer, const Node* node, SDL_Color co
     }
 }
 
-static void drawText(SDL_Renderer* renderer, const std::string& text, int x, int y, SDL_Color color, int fontSize = 16) {
-    if (text.empty()) return;
+static void drawText(SDL_Renderer* renderer, const std::string& text, int x, int y, int maxWidth, SDL_Color color, int fontSize = 16) {
+    if (text.empty() || maxWidth <= 0) return;
     TTF_Font* font = getFontForSize(fontSize);
     if (!font) {
         return;
     }
 
-    SDL_Surface* surface = TTF_RenderText_Blended(font, text.c_str(), text.length(), color);
+    // Use wrapped rendering if text is long or contains newlines
+    SDL_Surface* surface = TTF_RenderText_Blended_Wrapped(font, text.c_str(), text.length(), color, maxWidth);
     if (surface) {
         SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
         if (texture) {
@@ -344,53 +348,54 @@ static std::string getNodeText(const Node* node) {
 
 static void renderNode(SDL_Renderer* renderer, const Node* node, const std::string& baseUrl) {
     if (node->type == NodeType::Root) {
-        // Only draw the background in the viewport area.
-        // Screen clearing is handled in main.cpp.
         SDL_FRect contentRect = {node->x, node->y, node->width, node->height};
         SDL_SetRenderDrawColor(renderer, 24, 26, 32, 255);
         SDL_RenderFillRect(renderer, &contentRect);
-    } else if (node->type == NodeType::FlexV || node->type == NodeType::FlexH) {
-        SDL_Color fillColor = parseStyleColor(node, "bgcolor", {36, 40, 52, 255});
-        drawRectangle(renderer, node, fillColor, true);
-        drawRectangle(renderer, node, {78, 90, 110, 255}, false);
-    } else if (node->type == NodeType::Image) {
-        std::string altText = "[Image]";
-        std::string imageUrl;
-        SDL_Texture* imageTexture = nullptr;
-        
-        if (node->properties.contains("image") && node->properties["image"].is_object()) {
-            if (node->properties["image"].contains("alttext") && node->properties["image"]["alttext"].is_string()) {
-                altText = node->properties["image"]["alttext"].get<std::string>();
-            }
-            if (node->properties["image"].contains("url") && node->properties["image"]["url"].is_string()) {
-                imageUrl = node->properties["image"]["url"].get<std::string>();
-                std::string resolvedImageUrl = UrlUtils::resolvePath(baseUrl, imageUrl);
-                imageTexture = loadImageTexture(resolvedImageUrl);
-            }
+    } else {
+        // Draw background for all themed nodes
+        SDL_Color bgColor = parseStyleColor(node, "bgcolor", {0, 0, 0, 0});
+        if (bgColor.a > 0) {
+            drawRectangle(renderer, node, bgColor, true);
         }
         
-        // Draw background
-        SDL_Color bgColor = parseStyleColor(node, "bgcolor", {84, 100, 140, 255});
-        drawRectangle(renderer, node, bgColor, true);
-        drawRectangle(renderer, node, {170, 190, 210, 255}, false);
-        
-        // Try to render actual image if loaded
-        if (imageTexture) {
-            SDL_FRect dest = {node->x, node->y, node->width, node->height};
-            SDL_RenderTexture(renderer, imageTexture, nullptr, &dest);
-        } else {
-            // Fallback: render alttext with URL info
-            drawText(renderer, altText, static_cast<int>(node->x + 8.0f), static_cast<int>(node->y + 8.0f), {235, 235, 235, 255}, 12);
-            if (!imageUrl.empty()) {
-                drawText(renderer, "URL: " + imageUrl, static_cast<int>(node->x + 8.0f), static_cast<int>(node->y + 28.0f), {180, 180, 180, 255}, 10);
-            }
+        // Draw border if it's a flex container or explicitly requested
+        if (node->type == NodeType::FlexV || node->type == NodeType::FlexH) {
+            drawRectangle(renderer, node, {78, 90, 110, 255}, false);
         }
-    } else if (node->type == NodeType::Text) {
-        SDL_Color bgColor = parseStyleColor(node, "bgcolor", {24, 30, 40, 255});
-        SDL_Color textColor = parseStyleColor(node, "color", {230, 230, 230, 255});
-        int fontSize = parseStyleInt(node, "fontsize", 16);
-        drawRectangle(renderer, node, bgColor, true);
-        drawText(renderer, getNodeText(node), static_cast<int>(node->x + 6.0f), static_cast<int>(node->y + 6.0f), textColor, fontSize);
+
+        // Render Image if applicable
+        if (node->type == NodeType::Image || node->properties.contains("image")) {
+             std::string altText = "[Image]";
+             std::string imageUrl;
+             SDL_Texture* imageTexture = nullptr;
+             
+             if (node->properties.contains("image") && node->properties["image"].is_object()) {
+                 if (node->properties["image"].contains("alttext") && node->properties["image"]["alttext"].is_string()) {
+                     altText = node->properties["image"]["alttext"].get<std::string>();
+                 }
+                 if (node->properties["image"].contains("url") && node->properties["image"]["url"].is_string()) {
+                     imageUrl = node->properties["image"]["url"].get<std::string>();
+                     std::string resolvedImageUrl = UrlUtils::resolvePath(baseUrl, imageUrl);
+                     imageTexture = loadImageTexture(resolvedImageUrl);
+                 }
+             }
+             
+             if (imageTexture) {
+                 SDL_FRect dest = {node->x, node->y, node->width, node->height};
+                 SDL_RenderTexture(renderer, imageTexture, nullptr, &dest);
+             } else if (!imageUrl.empty() || node->type == NodeType::Image) {
+                 drawText(renderer, altText, static_cast<int>(node->x + 8.0f), static_cast<int>(node->y + 8.0f), static_cast<int>(node->width - 16.0f), {235, 235, 235, 255}, 12);
+             }
+        }
+
+        // Render Text if applicable (works for all nodes now)
+        std::string content = getNodeText(node);
+        if (!content.empty()) {
+            SDL_Color textColor = parseStyleColor(node, "color", {230, 230, 230, 255});
+            int fontSize = parseStyleInt(node, "fontsize", 16);
+            // Apply a consistent 8px padding for text inside boxes
+            drawText(renderer, content, static_cast<int>(node->x + 8.0f), static_cast<int>(node->y + 8.0f), static_cast<int>(node->width - 16.0f), textColor, fontSize);
+        }
     }
 
     for (const Node* child : node->children) {
@@ -443,9 +448,9 @@ void renderUrlBox(SDL_Renderer* renderer, const std::string& url, bool focused, 
 
     if (displayUrl.empty() && !focused) {
         displayUrl = "Search or enter address";
-        drawText(renderer, displayUrl, (int)textX, (int)textY, {120, 120, 130, 255}, 14);
+        drawText(renderer, displayUrl, (int)textX, (int)textY, (int)boxW - 20, {120, 120, 130, 255}, 14);
     } else {
-        drawText(renderer, displayUrl, (int)(textX - scrollOffset), (int)textY, {230, 230, 235, 255}, 14);
+        drawText(renderer, displayUrl, (int)(textX - scrollOffset), (int)textY, (int)boxW - 10, {230, 230, 235, 255}, 14);
 
         // Render cursor if focused
         if (focused && (SDL_GetTicks() / 500) % 2 == 0) {
@@ -515,7 +520,7 @@ void renderTabBar(SDL_Renderer* renderer, TabManager& tabManager,
         if (label.length() > 20) label = label.substr(0, 17) + "...";
         
         SDL_Color textColor = isActive ? SDL_Color{230, 230, 235, 255} : SDL_Color{140, 145, 150, 255};
-        drawText(renderer, label, (int)tabX + 12, (int)tabY + 10, textColor, 13);
+        drawText(renderer, label, (int)tabX + 12, (int)tabY + 10, TAB_WIDTH - 40, textColor, 13);
         
         // Close button (Merged square component)
         float cx = tabX + tabW - 24;
@@ -530,7 +535,7 @@ void renderTabBar(SDL_Renderer* renderer, TabManager& tabManager,
         SDL_Point xSize = measureText("x", 12);
         float xOff = (CLOSE_BUTTON_SIZE - xSize.x) / 2.0f;
         float yOff = (CLOSE_BUTTON_SIZE - xSize.y) / 2.0f;
-        drawText(renderer, "x", (int)cx + (int)xOff - 1, (int)cy + (int)yOff - 2, {180, 180, 180, 255}, 10);
+        drawText(renderer, "x", (int)cx + (int)xOff - 1, (int)cy + (int)yOff - 2, CLOSE_BUTTON_SIZE, {180, 180, 180, 255}, 10);
         
         g_tabRects.push_back({tabId, tabRect});
         x += TAB_WIDTH + TAB_SPACING;
@@ -543,7 +548,7 @@ void renderTabBar(SDL_Renderer* renderer, TabManager& tabManager,
     SDL_FRect plusRect = {plusX, plusY, plusSize, plusSize};
     
     drawSquaredBox(renderer, plusX, plusY, plusSize, plusSize, {60, 63, 66, 255}, {80, 83, 86, 255}, true);
-    drawText(renderer, "+", (int)plusX + 7, (int)plusY + 1, {220, 220, 225, 255}, 18);
+    drawText(renderer, "+", (int)plusX + 7, (int)plusY + 1, (int)plusSize, {220, 220, 225, 255}, 18);
     
     g_tabRects.push_back({-99, plusRect}); 
 }
@@ -587,8 +592,8 @@ void renderDom(SDL_Renderer* renderer, const Node* root, const std::string& base
         int centerX = 1280 / 2;
         int centerY = 90 + (630 / 2);
         
-        drawText(renderer, welcome, centerX - (wSize.x / 2), centerY - 40, {245, 245, 250, 255}, 28);
-        drawText(renderer, subtext, centerX - (sSize.x / 2), centerY + 10, {150, 150, 160, 255}, 14);
+        drawText(renderer, welcome, centerX - (wSize.x / 2), centerY - 40, 800, {245, 245, 250, 255}, 28);
+        drawText(renderer, subtext, centerX - (sSize.x / 2), centerY + 10, 800, {150, 150, 160, 255}, 14);
         return;
     }
     renderNode(renderer, root, baseUrl);

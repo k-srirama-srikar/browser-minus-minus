@@ -26,22 +26,23 @@ static std::string getNodeText(const Node* node) {
 }
 
 static float measureTextWidth(const std::string& text, float fontSize) {
+    if (text.empty()) return 0.0f;
     const float charWidth = std::max(1.0f, fontSize * 0.55f);
-    return std::max(0.0f, static_cast<float>(text.size()) * charWidth);
+    // Add 16px for left+right padding (8px each)
+    return (static_cast<float>(text.size()) * charWidth) + 16.0f;
 }
 
 static float measureTextHeight(const std::string& text, float maxWidth, float fontSize) {
     const float charWidth = std::max(1.0f, fontSize * 0.55f);
     const float lineHeight = std::max(1.0f, fontSize * 1.25f);
     if (text.empty()) {
-        return lineHeight;
+        return lineHeight + 16.0f; // Padding
     }
-    if (maxWidth <= charWidth) {
-        return lineHeight * static_cast<float>((text.size() + 1) / 1);
-    }
-    int columns = std::max(1, static_cast<int>(std::floor(maxWidth / charWidth)));
+    
+    float availableWidth = std::max(1.0f, maxWidth - 16.0f); // Accounting for 8px left/right padding
+    int columns = std::max(1, static_cast<int>(std::floor(availableWidth / charWidth)));
     int lines = static_cast<int>((text.size() + columns - 1) / columns);
-    return std::max(lineHeight, lineHeight * static_cast<float>(lines));
+    return (lineHeight * static_cast<float>(lines)) + 16.0f; // Accounting for 8px top/bottom padding
 }
 
 void layoutNode(Node* node, float x, float y, float width, float height) {
@@ -62,13 +63,19 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
         return;
     }
 
-    if (node->type == NodeType::Text) {
-        std::string content = getNodeText(node);
+    // Nodes with Text trait (could be any node type now)
+    std::string content = getNodeText(node);
+    if (!content.empty()) {
         float fontSize = parseStyleFloat(node, "fontsize", 16.0f);
-        float effectiveWidth = width > 0.0f ? width : measureTextWidth(content, fontSize);
-        node->width = effectiveWidth;
-        node->height = measureTextHeight(content, effectiveWidth, fontSize);
-        return;
+        float measuredWidth = measureTextWidth(content, fontSize);
+        float measuredHeight = measureTextHeight(content, width > 0.0f ? width : measuredWidth, fontSize);
+        
+        // If width/height were not provided by parent, use measured values
+        if (node->width <= 0.0f) node->width = measuredWidth;
+        if (node->height <= 0.0f) node->height = measuredHeight;
+        
+        // If it's JUST a text node, we can return. Otherwise, it might have children to layout below/within.
+        if (node->type == NodeType::Text) return;
     }
 
     if (node->type == NodeType::Image) {
@@ -95,8 +102,14 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
     if (node->type == NodeType::FlexV) {
         float fixedHeight = 0.0f;
         int flexCount = 0;
-        for (Node* child : node->children) {
-            if (child->type == NodeType::Text) {
+        float totalSpacing = 0.0f;
+
+        for (int i = 0; i < count; ++i) {
+            Node* child = node->children[i];
+            float childSpacing = parseStyleFloat(child, "spacing", 8.0f);
+            if (i > 0) totalSpacing += childSpacing;
+
+            if (!getNodeText(child).empty()) {
                 float fontSize = parseStyleFloat(child, "fontsize", 16.0f);
                 fixedHeight += measureTextHeight(getNodeText(child), innerWidth, fontSize);
             } else if (child->type == NodeType::Image) {
@@ -106,13 +119,17 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
             }
         }
 
-        float remaining = innerHeight - fixedHeight - totalGap;
+        float remaining = innerHeight - fixedHeight - totalSpacing;
         float flexHeight = flexCount > 0 ? std::max(40.0f, remaining / static_cast<float>(flexCount)) : 0.0f;
 
         float cursorY = innerY;
-        for (Node* child : node->children) {
+        for (int i = 0; i < count; ++i) {
+            Node* child = node->children[i];
+            float childSpacing = parseStyleFloat(child, "spacing", 8.0f);
+            if (i > 0) cursorY += childSpacing;
+
             float childHeight = 0.0f;
-            if (child->type == NodeType::Text) {
+            if (!getNodeText(child).empty()) {
                 float fontSize = parseStyleFloat(child, "fontsize", 16.0f);
                 childHeight = measureTextHeight(getNodeText(child), innerWidth, fontSize);
             } else if (child->type == NodeType::Image) {
@@ -121,7 +138,7 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
                 childHeight = std::max(40.0f, flexHeight);
             }
             layoutNode(child, innerX, cursorY, innerWidth, childHeight);
-            cursorY += childHeight + gap;
+            cursorY += childHeight;
         }
         return;
     }
@@ -129,8 +146,14 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
     if (node->type == NodeType::FlexH) {
         float fixedWidth = 0.0f;
         int flexCount = 0;
-        for (Node* child : node->children) {
-            if (child->type == NodeType::Text) {
+        float totalSpacing = 0.0f;
+
+        for (int i = 0; i < count; ++i) {
+            Node* child = node->children[i];
+            float childSpacing = parseStyleFloat(child, "spacing", 8.0f);
+            if (i > 0) totalSpacing += childSpacing;
+
+            if (!getNodeText(child).empty()) {
                 float fontSize = parseStyleFloat(child, "fontsize", 16.0f);
                 fixedWidth += measureTextWidth(getNodeText(child), fontSize);
             } else if (child->type == NodeType::Image) {
@@ -140,23 +163,26 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
             }
         }
 
-        float remaining = innerWidth - fixedWidth - totalGap;
+        float remaining = innerWidth - fixedWidth - totalSpacing;
         float flexWidth = flexCount > 0 ? std::max(80.0f, remaining / static_cast<float>(flexCount)) : 0.0f;
 
         float cursorX = innerX;
-        for (Node* child : node->children) {
+        for (int i = 0; i < count; ++i) {
+            Node* child = node->children[i];
+            float childSpacing = parseStyleFloat(child, "spacing", 8.0f);
+            if (i > 0) cursorX += childSpacing;
+
             float childWidth = 0.0f;
-            if (child->type == NodeType::Text) {
+            if (!getNodeText(child).empty()) {
                 float fontSize = parseStyleFloat(child, "fontsize", 16.0f);
-                float measured = measureTextWidth(getNodeText(child), fontSize);
-                childWidth = std::max(80.0f, measured);
+                childWidth = measureTextWidth(getNodeText(child), fontSize);
             } else if (child->type == NodeType::Image) {
                 childWidth = parseStyleFloat(child, "width", 240.0f);
             } else {
                 childWidth = std::max(80.0f, flexWidth);
             }
             layoutNode(child, cursorX, innerY, childWidth, innerHeight);
-            cursorX += childWidth + gap;
+            cursorX += childWidth;
         }
         return;
     }

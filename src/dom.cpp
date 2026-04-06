@@ -13,19 +13,24 @@ static Node* parseNodeRecursive(const json& jElement) {
     
     Node* node = new Node();
     node->id = nextNodeId();
-    node->type = NodeType::FlexV;
+    node->type = NodeType::FlexV; // Default type
 
-    if (jElement.contains("tag") && jElement["tag"].is_string()) {
-        node->tag = jElement["tag"].get<std::string>();
+    if (jElement.contains("tag")) {
+        if (jElement["tag"].is_string()) {
+            node->tag = jElement["tag"].get<std::string>();
+        } else if (jElement["tag"].is_number()) {
+            node->tag = std::to_string(jElement["tag"].get<int>());
+        }
     }
 
     nlohmann::json props = nlohmann::json::object();
     for (auto& [key, val] : jElement.items()) {
-        if (key != "flexv" && key != "flexh" && key != "text" && key != "image" && key != "tag") {
+        if (key != "tag") {
             props[key] = val;
         }
     }
 
+    // Determine type but don't make it exclusive for properties
     if (jElement.contains("flexv") && jElement["flexv"].is_array()) {
         node->type = NodeType::FlexV;
         for (const auto& childJson : jElement["flexv"]) {
@@ -40,10 +45,8 @@ static Node* parseNodeRecursive(const json& jElement) {
         }
     } else if (jElement.contains("text")) {
         node->type = NodeType::Text;
-        props["text"] = jElement["text"];
     } else if (jElement.contains("image")) {
         node->type = NodeType::Image;
-        props["image"] = jElement["image"];
     }
 
     node->properties = props;
