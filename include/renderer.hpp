@@ -20,4 +20,6 @@ int getTabAtPosition(float x, float y);
 int getCloseButtonTabAtPosition(float x, float y);
 void renderDom(SDL_Renderer* renderer, const Node* root, const std::string& baseUrl);
 void renderScrollbar(SDL_Renderer* renderer, float scrollY, float maxScrollY, int viewportHeight, int windowWidth, int viewportY);
+float getTabScrollOffset();
+void setTabScrollOffset(float offset);
 void shutdownRenderer();

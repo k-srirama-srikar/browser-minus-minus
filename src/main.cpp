@@ -195,9 +195,17 @@ int main(int argc, char* argv[]) {
                 }
             }
             
-            // Mouse wheel for scrolling
+            // Mouse wheel for scrolling (Page and Tab Bar)
             if (event.type == SDL_EVENT_MOUSE_WHEEL) {
-                if (activeTab) {
+                float mx = event.wheel.mouse_x;
+                float my = event.wheel.mouse_y;
+
+                if (my < TAB_BAR_HEIGHT) {
+                    // Scroll tab bar horizontally
+                    float currentOffset = getTabScrollOffset();
+                    setTabScrollOffset(currentOffset - event.wheel.y * 50.0f); // 50px per notch
+                } else if (activeTab) {
+                    // Scroll active tab vertically
                     activeTab->handleScroll(-event.wheel.y * 30.0f); // 30px per notch
                 }
             }

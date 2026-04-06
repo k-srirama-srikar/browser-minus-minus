@@ -22,6 +22,14 @@ static std::unordered_map<std::string, SDL_Texture*> g_imageCache;
 static std::string g_fontPath;
 static std::vector<std::pair<int, SDL_FRect>> g_tabRects;
 static std::vector<std::pair<int, SDL_FRect>> g_closeRects;
+static float g_tabScrollOffset = 0.0f;
+static float g_urlScrollOffset = 0.0f;
+static float g_maxTabScroll = 0.0f;
+
+float getTabScrollOffset() { return g_tabScrollOffset; }
+void setTabScrollOffset(float offset) { 
+    g_tabScrollOffset = std::max(0.0f, std::min(offset, g_maxTabScroll)); 
+}
 
 static bool fileExists(const std::string& path) {
     if (path.empty()) {
@@ -445,21 +453,28 @@ void renderUrlBox(SDL_Renderer* renderer, const std::string& url, bool focused, 
 
     SDL_Point totalSize = measureText(displayUrl, 14);
     int cursorX = measureText(displayUrl.substr(0, cursorPosition), 14).x;
-    
-    float scrollOffset = 0;
-    if (cursorX > boxW - 40) {
-        scrollOffset = cursorX - (boxW - 40);
+    float cursorVisualX = (float)cursorX - g_urlScrollOffset;
+    float margin = 30.0f;
+
+    if (cursorVisualX < margin) {
+        g_urlScrollOffset = std::max(0.0f, (float)cursorX - margin);
+    } else if (cursorVisualX > boxW - margin) {
+        g_urlScrollOffset = (float)cursorX - (boxW - margin);
     }
+    
+    // Ensure scroll offset is sane
+    float maxUrlScroll = std::max(0.0f, (float)totalSize.x - (boxW - 20.0f));
+    if (g_urlScrollOffset > maxUrlScroll) g_urlScrollOffset = maxUrlScroll;
 
     if (displayUrl.empty() && !focused) {
         displayUrl = "Search or enter address";
         drawText(renderer, displayUrl, (int)textX, (int)textY, (int)boxW - 20, {120, 120, 130, 255}, 14);
     } else {
-        drawText(renderer, displayUrl, (int)(textX - scrollOffset), (int)textY, (int)boxW - 10, {230, 230, 235, 255}, 14);
+        drawText(renderer, displayUrl, (int)(textX - g_urlScrollOffset), (int)textY, (int)boxW - 10, {230, 230, 235, 255}, 14);
 
         // Render cursor if focused
         if (focused && (SDL_GetTicks() / 500) % 2 == 0) {
-            SDL_FRect cursorRect = {textX + (float)cursorX - scrollOffset, textY + 1.0f, 2.0f, 16.0f};
+            SDL_FRect cursorRect = {textX + (float)cursorX - g_urlScrollOffset, textY + 1.0f, 2.0f, 16.0f};
             SDL_SetRenderDrawColor(renderer, 100, 150, 255, 255);
             SDL_RenderFillRect(renderer, &cursorRect);
         }
@@ -484,8 +499,20 @@ void renderTabBar(SDL_Renderer* renderer, TabManager& tabManager,
     SDL_SetRenderDrawColor(renderer, 32, 33, 36, 255); // Standard Chrome Dark bg
     SDL_RenderFillRect(renderer, &bgRect);
     
-    int x = 8;
     auto tabIds = tabManager.getAllTabIds();
+    
+    // Calculate total tab width and max scroll
+    int totalTabWidth = 16 + (int)tabIds.size() * (TAB_WIDTH + TAB_SPACING) + 40; 
+    g_maxTabScroll = std::max(0.0f, (float)totalTabWidth - (float)windowWidth);
+    if (g_tabScrollOffset > g_maxTabScroll) g_tabScrollOffset = g_maxTabScroll;
+
+    // Set clipping for tab bar
+    SDL_Rect tabViewport = {0, 0, windowWidth, TAB_HEIGHT};
+    SDL_Rect prevViewport;
+    SDL_GetRenderViewport(renderer, &prevViewport);
+    SDL_SetRenderViewport(renderer, &tabViewport);
+
+    int x = 8 - (int)g_tabScrollOffset;
     
     for (int tabId : tabIds) {
         Tab* tab = tabManager.getTab(tabId);
@@ -556,6 +583,20 @@ void renderTabBar(SDL_Renderer* renderer, TabManager& tabManager,
     drawText(renderer, "+", (int)plusX + 7, (int)plusY + 1, (int)plusSize, {220, 220, 225, 255}, 18);
     
     g_tabRects.push_back({-99, plusRect}); 
+    
+    // Reset viewport
+    SDL_SetRenderViewport(renderer, &prevViewport);
+
+    // Render Tab Scrollbar if overflowing
+    if (g_maxTabScroll > 0) {
+        float ratio = (float)windowWidth / (float)totalTabWidth;
+        float barW = std::max(20.0f, ratio * (float)windowWidth);
+        float barX = (g_tabScrollOffset / g_maxTabScroll) * ((float)windowWidth - barW);
+        
+        SDL_FRect tabScrollRect = {barX, (float)TAB_HEIGHT - 3.0f, barW, 2.0f};
+        SDL_SetRenderDrawColor(renderer, 59, 130, 246, 200); // Blue accent
+        SDL_RenderFillRect(renderer, &tabScrollRect);
+    }
 }
 
 int getTabAtPosition(float x, float y) {
