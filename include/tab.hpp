@@ -18,6 +18,10 @@ private:
     TripleBuffer<RenderCommand> renderTripleBuffer;  // Thread-safe render tree passing
     std::map<int, sol::function> clickHandlers;  // Tab-specific click handlers
     
+    // Scrolling state
+    float scrollY = 0.0f;
+    float maxScrollY = 0.0f;
+    
     friend class TabManager;
     
 public:
@@ -31,6 +35,17 @@ public:
     Node* getDomRoot() const { return domRoot; }
     sol::state* getLuaState() { return luaState.get(); }
     TripleBuffer<RenderCommand>& getRenderBuffer() { return renderTripleBuffer; }
+    
+    // Scrolling
+    float getScrollY() const { return scrollY; }
+    float getMaxScrollY() const { return maxScrollY; }
+    void setScrollY(float y) { 
+        scrollY = std::max(0.0f, std::min(y, maxScrollY)); 
+    }
+    void setMaxScrollY(float max) { maxScrollY = std::max(0.0f, max); }
+    void handleScroll(float delta) {
+        setScrollY(scrollY + delta);
+    }
     
     // DOM management
     void setDomRoot(Node* newRoot);

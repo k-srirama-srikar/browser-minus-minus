@@ -2,6 +2,7 @@
 #include "scripting.hpp"
 #include "dom.hpp"
 #include "network.hpp"
+#include "url_utils.hpp"
 #include <sol/sol.hpp>
 #include <iostream>
 #include <vector>
@@ -291,8 +292,9 @@ bool initTabScripting(Tab* tab, int screenWidth, int screenHeight) {
             return rect;
         });
         
-        browser.set_function("fetch", [luaState](const std::string& url, sol::function callback) {
-            std::string normalized = normalizeFetchPath(url);
+        browser.set_function("fetch", [tab, luaState](const std::string& url, sol::function callback) {
+            std::string resolved = UrlUtils::resolvePath(tab->getBaseUrl(), url);
+            std::string normalized = normalizeFetchPath(resolved);
             std::string response;
             bool success = false;
             if (normalized.rfind("http://", 0) == 0 || normalized.rfind("https://", 0) == 0) {
@@ -314,7 +316,7 @@ bool initTabScripting(Tab* tab, int screenWidth, int screenHeight) {
             try {
                 callback(arg);
             } catch (const sol::error& e) {
-                std::cerr << "Lua fetch callback error: " << e.what() << std::endl;
+                std::clog << "Lua fetch callback error: " << e.what() << std::endl;
             }
         });
         

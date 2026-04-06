@@ -125,7 +125,7 @@ end)
 
 showElementBounds("hero-image")
 
-browser.fetch("assets/test2_data.json", function(response)
+browser.fetch("test2_data.json", function(response)
     if response then
         hydrateFetchContent(response)
         browser.log("Fetch completed and updated content.")

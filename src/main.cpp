@@ -195,6 +195,13 @@ int main(int argc, char* argv[]) {
                 }
             }
             
+            // Mouse wheel for scrolling
+            if (event.type == SDL_EVENT_MOUSE_WHEEL) {
+                if (activeTab) {
+                    activeTab->handleScroll(-event.wheel.y * 30.0f); // 30px per notch
+                }
+            }
+
             // Mouse click handling
             if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
                 float mx = event.button.x;
@@ -274,9 +281,13 @@ int main(int argc, char* argv[]) {
 
         // Layout the DOM for active tab
         if (activeTab && activeTab->getDomRoot()) {
-            layoutNode(activeTab->getDomRoot(), 0.0f, static_cast<float>(VIEWPORT_Y), 
+            layoutNode(activeTab->getDomRoot(), 0.0f, static_cast<float>(VIEWPORT_Y) - activeTab->getScrollY(), 
                       static_cast<float>(WINDOW_WIDTH), 
                       static_cast<float>(VIEWPORT_HEIGHT));
+            
+            // Update max scroll bound
+            float contentHeight = activeTab->getDomRoot()->height;
+            activeTab->setMaxScrollY(contentHeight - static_cast<float>(VIEWPORT_HEIGHT));
         }
 
         // Render
@@ -289,9 +300,18 @@ int main(int argc, char* argv[]) {
         // Render URL box (positioned below tab bar)
         renderUrlBox(renderer, urlInput, urlBoxFocused, WINDOW_WIDTH, URL_BAR_HEIGHT, urlCursorPos, TAB_BAR_HEIGHT);
         
-        // Render active tab's DOM
+        // Render active tab's DOM with clipping
         if (activeTab && activeTab->getDomRoot()) {
+            SDL_Rect clipRect = { 0, VIEWPORT_Y, WINDOW_WIDTH, VIEWPORT_HEIGHT };
+            SDL_SetRenderClipRect(renderer, &clipRect);
+            
             renderDom(renderer, activeTab->getDomRoot(), activeTab->getBaseUrl());
+            
+            // Reset clipping for chrome and scrollbar rendering
+            SDL_SetRenderClipRect(renderer, nullptr);
+
+            // Render scrollbar
+            renderScrollbar(renderer, activeTab->getScrollY(), activeTab->getMaxScrollY(), VIEWPORT_HEIGHT, WINDOW_WIDTH, VIEWPORT_Y);
         }
         
         SDL_RenderPresent(renderer);

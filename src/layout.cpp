@@ -57,9 +57,12 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
     
     // JSML root might just be a shell, let's just lay it out with 0 padding
     if (node->type == NodeType::Root) {
+        float totalHeight = 0.0f;
         if (!node->children.empty()) {
             layoutNode(node->children[0], x, y, width, height);
+            totalHeight = node->children[0]->height;
         }
+        node->height = std::max(height, totalHeight); // Ensure it's at least as tall as viewport
         return;
     }
 
@@ -88,16 +91,26 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
 
     float padding = parseStyleFloat(node, "padding", 12.0f);
     float gap = parseStyleFloat(node, "spacing", 8.0f);
-    float innerX = x + padding;
-    float innerY = y + padding;
-    float innerWidth = std::max(0.0f, width - padding * 2.0f);
-    float innerHeight = std::max(0.0f, height - padding * 2.0f);
-    const int count = static_cast<int>(node->children.size());
-    if (count == 0) {
-        return;
+    
+    // If the node has its own text, we space the children below/beside it
+    float headerHeight = 0.0f;
+    float headerWidth = 0.0f;
+    if (!content.empty()) {
+        float fontSize = parseStyleFloat(node, "fontsize", 16.0f);
+        headerHeight = measureTextHeight(content, width > 0.0f ? width : 2000.0f, fontSize);
+        headerWidth = measureTextWidth(content, fontSize);
     }
 
-    float totalGap = gap * static_cast<float>(count - 1);
+    float innerX = x + padding + (node->type == NodeType::FlexH ? headerWidth : 0.0f);
+    float innerY = y + padding + (node->type == NodeType::FlexV ? headerHeight : 0.0f);
+    float innerWidth = std::max(0.0f, width - padding * 2.0f - (node->type == NodeType::FlexH ? headerWidth : 0.0f));
+    float innerHeight = std::max(0.0f, height - padding * 2.0f - (node->type == NodeType::FlexV ? headerHeight : 0.0f));
+    
+    const int count = static_cast<int>(node->children.size());
+    if (count == 0) {
+        // If we have text but no children, node size is already set above
+        return;
+    }
     
     if (node->type == NodeType::FlexV) {
         float fixedHeight = 0.0f;
@@ -138,8 +151,13 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
                 childHeight = std::max(40.0f, flexHeight);
             }
             layoutNode(child, innerX, cursorY, innerWidth, childHeight);
-            cursorY += childHeight;
+            cursorY += child->height + childSpacing;
         }
+
+        // --- DYNAMIC HEIGHT FIX ---
+        // Update the container's final height to fit its content if it's taller than the initial height
+        float contentHeight = (cursorY - innerY) + padding * 2.0f;
+        node->height = std::max(height, contentHeight);
         return;
     }
 
@@ -179,11 +197,20 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
             } else if (child->type == NodeType::Image) {
                 childWidth = parseStyleFloat(child, "width", 240.0f);
             } else {
-                childWidth = std::max(80.0f, flexWidth);
+                childWidth = std::max(40.0f, flexWidth);
             }
+
             layoutNode(child, cursorX, innerY, childWidth, innerHeight);
-            cursorX += childWidth;
+            cursorX += child->width + childSpacing;
         }
+
+        // --- DYNAMIC HEIGHT FIX FOR FLEXH ---
+        float maxChildHeight = 0.0f;
+        for (Node* child : node->children) {
+            maxChildHeight = std::max(maxChildHeight, child->height);
+        }
+        node->height = std::max(height, maxChildHeight + padding * 2.0f);
+        node->width = std::max(width, (cursorX - innerX) + padding * 2.0f);
         return;
     }
 }

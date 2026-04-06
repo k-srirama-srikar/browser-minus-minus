@@ -60,7 +60,7 @@ static const char* defaultMarkup = R"JSON(
 // ============================================================================
 
 Tab::Tab(int id, const std::string& initialUrl)
-    : tabId(id), url(initialUrl), domRoot(nullptr) {
+    : tabId(id), url(initialUrl), domRoot(nullptr), scrollY(0.0f), maxScrollY(0.0f) {
 }
 
 Tab::~Tab() {

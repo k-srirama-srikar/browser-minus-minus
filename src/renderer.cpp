@@ -393,8 +393,13 @@ static void renderNode(SDL_Renderer* renderer, const Node* node, const std::stri
         if (!content.empty()) {
             SDL_Color textColor = parseStyleColor(node, "color", {230, 230, 230, 255});
             int fontSize = parseStyleInt(node, "fontsize", 16);
-            // Apply a consistent 8px padding for text inside boxes
-            drawText(renderer, content, static_cast<int>(node->x + 8.0f), static_cast<int>(node->y + 8.0f), static_cast<int>(node->width - 16.0f), textColor, fontSize);
+            
+            // Calculate vertical centering
+            SDL_Point size = measureText(content, fontSize);
+            float textY = node->y + (node->height - (float)size.y) / 2.0f;
+            if (textY < node->y + 4.0f) textY = node->y + 4.0f; // Minimal top padding
+
+            drawText(renderer, content, static_cast<int>(node->x + 12.0f), static_cast<int>(textY), static_cast<int>(node->width - 24.0f), textColor, fontSize);
         }
     }
 
@@ -597,4 +602,27 @@ void renderDom(SDL_Renderer* renderer, const Node* root, const std::string& base
         return;
     }
     renderNode(renderer, root, baseUrl);
+}
+
+void renderScrollbar(SDL_Renderer* renderer, float scrollY, float maxScrollY, int viewportHeight, int windowWidth, int viewportY) {
+    if (maxScrollY <= 0) return;
+    
+    float totalHeight = (float)viewportHeight + maxScrollY;
+    float ratio = (float)viewportHeight / totalHeight;
+    float handleHeight = std::max(40.0f, ratio * (float)viewportHeight);
+    float handlePos = (scrollY / maxScrollY) * ((float)viewportHeight - handleHeight);
+    
+    SDL_FRect track = { (float)windowWidth - 14.0f, (float)viewportY, 14.0f, (float)viewportHeight };
+    SDL_FRect handle = { (float)windowWidth - 11.0f, (float)viewportY + handlePos, 8.0f, handleHeight };
+    
+    // Draw track (subtle dark gray background with border)
+    SDL_SetRenderDrawColor(renderer, 24, 25, 30, 160);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_RenderFillRect(renderer, &track);
+    
+    // Draw handle (Vibrant accent blue for high visibility)
+    SDL_SetRenderDrawColor(renderer, 59, 130, 246, 220); // #3b82f6 blue
+    SDL_RenderFillRect(renderer, &handle);
+    
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }
