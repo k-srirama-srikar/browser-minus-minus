@@ -312,6 +312,7 @@ static void drawVerticalGradient(SDL_Renderer* renderer, float x, float y, float
 }
 
 static void drawRectangle(SDL_Renderer* renderer, const Node* node, SDL_Color color, bool fill) {
+    if (!node) return;
     SDL_FRect rect;
     rect.x = node->x;
     rect.y = node->y;
@@ -319,21 +320,35 @@ static void drawRectangle(SDL_Renderer* renderer, const Node* node, SDL_Color co
     rect.h = node->height;
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
     if (fill) {
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
         SDL_RenderFillRect(renderer, &rect);
-    } else {
-        SDL_RenderRect(renderer, &rect);
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
     }
 }
 
 static void drawText(SDL_Renderer* renderer, const std::string& text, int x, int y, int maxWidth, SDL_Color color, int fontSize = 16) {
     if (text.empty() || maxWidth <= 0) return;
     TTF_Font* font = getFontForSize(fontSize);
-    if (!font) {
-        return;
-    }
+    if (!font) return;
 
-    // Use wrapped rendering if text is long or contains newlines
     SDL_Surface* surface = TTF_RenderText_Blended_Wrapped(font, text.c_str(), text.length(), color, maxWidth);
+    if (surface) {
+        SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+        if (texture) {
+            SDL_FRect dest = { static_cast<float>(x), static_cast<float>(y), static_cast<float>(surface->w), static_cast<float>(surface->h) };
+            SDL_RenderTexture(renderer, texture, nullptr, &dest);
+            SDL_DestroyTexture(texture);
+        }
+        SDL_DestroySurface(surface);
+    }
+}
+
+static void drawTextSingleLine(SDL_Renderer* renderer, const std::string& text, int x, int y, SDL_Color color, int fontSize = 16) {
+    if (text.empty()) return;
+    TTF_Font* font = getFontForSize(fontSize);
+    if (!font) return;
+
+    SDL_Surface* surface = TTF_RenderText_Blended(font, text.c_str(), text.length(), color);
     if (surface) {
         SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
         if (texture) {
@@ -468,9 +483,9 @@ void renderUrlBox(SDL_Renderer* renderer, const std::string& url, bool focused, 
 
     if (displayUrl.empty() && !focused) {
         displayUrl = "Search or enter address";
-        drawText(renderer, displayUrl, (int)textX, (int)textY, (int)boxW - 20, {120, 120, 130, 255}, 14);
+        drawTextSingleLine(renderer, displayUrl, (int)textX, (int)textY, {120, 120, 130, 255}, 14);
     } else {
-        drawText(renderer, displayUrl, (int)(textX - g_urlScrollOffset), (int)textY, (int)boxW - 10, {230, 230, 235, 255}, 14);
+        drawTextSingleLine(renderer, displayUrl, (int)(textX - g_urlScrollOffset), (int)textY, {230, 230, 235, 255}, 14);
 
         // Render cursor if focused
         if (focused && (SDL_GetTicks() / 500) % 2 == 0) {
