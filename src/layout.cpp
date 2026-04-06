@@ -28,8 +28,20 @@ static std::string getNodeText(const Node* node) {
 static float measureTextWidth(const std::string& text, float fontSize) {
     if (text.empty()) return 0.0f;
     const float charWidth = std::max(1.0f, fontSize * 0.55f);
-    // Add 16px for left+right padding (8px each)
-    return (static_cast<float>(text.size()) * charWidth) + 16.0f;
+    
+    // Find the longest line to determine the overall width
+    size_t start = 0;
+    size_t end = text.find('\n');
+    size_t longestLineSize = 0;
+    
+    while (end != std::string::npos) {
+        longestLineSize = std::max(longestLineSize, end - start);
+        start = end + 1;
+        end = text.find('\n', start);
+    }
+    longestLineSize = std::max(longestLineSize, text.length() - start);
+    
+    return (static_cast<float>(longestLineSize) * charWidth) + 16.0f;
 }
 
 static float measureTextHeight(const std::string& text, float maxWidth, float fontSize) {
@@ -41,8 +53,23 @@ static float measureTextHeight(const std::string& text, float maxWidth, float fo
     
     float availableWidth = std::max(1.0f, maxWidth - 16.0f); // Accounting for 8px left/right padding
     int columns = std::max(1, static_cast<int>(std::floor(availableWidth / charWidth)));
-    int lines = static_cast<int>((text.size() + columns - 1) / columns);
-    return (lineHeight * static_cast<float>(lines)) + 16.0f; // Accounting for 8px top/bottom padding
+    
+    int totalWrappedLines = 0;
+    size_t start = 0;
+    size_t end = text.find('\n');
+    
+    while (true) {
+        size_t lineLength = (end == std::string::npos) ? text.length() - start : end - start;
+        // Even an empty line (two \n in a row) counts as one line
+        int wrappedForThisLine = (lineLength == 0) ? 1 : std::max(1, static_cast<int>((lineLength + columns - 1) / columns));
+        totalWrappedLines += wrappedForThisLine;
+        
+        if (end == std::string::npos) break;
+        start = end + 1;
+        end = text.find('\n', start);
+    }
+    
+    return (lineHeight * static_cast<float>(totalWrappedLines)) + 16.0f; // Accounting for 8px top/bottom padding
 }
 
 void layoutNode(Node* node, float x, float y, float width, float height) {
@@ -151,7 +178,7 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
                 childHeight = std::max(40.0f, flexHeight);
             }
             layoutNode(child, innerX, cursorY, innerWidth, childHeight);
-            cursorY += child->height + childSpacing;
+            cursorY += child->height;
         }
 
         // --- DYNAMIC HEIGHT FIX ---
@@ -201,7 +228,7 @@ void layoutNode(Node* node, float x, float y, float width, float height) {
             }
 
             layoutNode(child, cursorX, innerY, childWidth, innerHeight);
-            cursorX += child->width + childSpacing;
+            cursorX += child->width;
         }
 
         // --- DYNAMIC HEIGHT FIX FOR FLEXH ---
