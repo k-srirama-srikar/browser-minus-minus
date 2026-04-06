@@ -323,6 +323,10 @@ static void drawRectangle(SDL_Renderer* renderer, const Node* node, SDL_Color co
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
         SDL_RenderFillRect(renderer, &rect);
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+    } else {
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+        SDL_RenderRect(renderer, &rect);
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
     }
 }
 
@@ -381,8 +385,12 @@ static void renderNode(SDL_Renderer* renderer, const Node* node, const std::stri
             drawRectangle(renderer, node, bgColor, true);
         }
         
-        // Draw border if it's a flex container or explicitly requested
-        if (node->type == NodeType::FlexV || node->type == NodeType::FlexH) {
+        // Draw border if requested or if it's a container
+        SDL_Color borderColor = parseStyleColor(node, "bordercolor", {0, 0, 0, 0});
+        if (borderColor.a > 0) {
+            drawRectangle(renderer, node, borderColor, false);
+        } else if (node->type == NodeType::FlexV || node->type == NodeType::FlexH) {
+            // Default subtle border for sections
             drawRectangle(renderer, node, {78, 90, 110, 255}, false);
         }
 
