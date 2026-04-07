@@ -4,6 +4,9 @@
 
 `Browser--` is a lightweight browser project written in modern C++ with Lua scripting support.
 
+> [!WARNING]
+> There is a lot of AI generated code in this repository, so if you do test this out and find FBI knocking your door later on at some point I am in no way responsible for it
+
 ## Prerequisites
 
 Before building this repository, install the following dependencies:
@@ -31,7 +34,16 @@ sudo dnf install -y gcc-c++ cmake pkgconf-pkg-config libcurl-devel SDL3-devel SD
 
 > Note: package names may vary by distribution. Ensure you have development headers for SDL3, SDL3_ttf, libcurl, and Lua 5.4.
 
-## Build Instructions
+### Quick Install
+
+For a quick setup that handles dependencies and building, run:
+
+```bash
+chmod +x install.sh
+./install.sh
+```
+
+### Manual Build
 
 From the repository root:
 
