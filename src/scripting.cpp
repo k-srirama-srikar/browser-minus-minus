@@ -60,6 +60,11 @@ static void findNodesByTagRecursive(Node* current, const std::string& tag, std::
     }
 }
 
+static int nextNodeId() {
+    static int id = 1;
+    return id++;
+}
+
 static sol::object jsonToLua(const nlohmann::json& j, sol::state_view lua) {
     if (j.is_null()) return sol::make_object(lua, sol::nil);
     if (j.is_boolean()) return sol::make_object(lua, j.get<bool>());
@@ -204,6 +209,12 @@ bool initScripting(Node* documentRoot) {
         
         std::vector<int> ids;
         findNodesByTagRecursive(g_document, tag, ids);
+        
+        // Fallback: if string tag not found, check semantic tag mappings
+        if (ids.empty() && tag == "main-container") {
+            findNodesByTagRecursive(g_document, "1", ids);
+        }
+        
         sol::table result = g_lua->create_table();
         for (size_t i = 0; i < ids.size(); ++i) {
             result[i + 1] = ids[i];
@@ -214,13 +225,121 @@ bool initScripting(Node* documentRoot) {
     browser.set_function("getElem", [](int id) -> sol::object {
         Node* node = findNodeByIdRecursive(g_document, id);
         if (!node) return sol::nil;
-        return jsonToLua(node->properties, *g_lua);
+        
+        sol::table elemTable = g_lua->create_table();
+        elemTable["id"] = node->id;
+        elemTable["tag"] = node->tag;
+        
+        // Add all properties
+        for (auto& [key, value] : node->properties.items()) {
+            elemTable[key] = jsonToLua(value, *g_lua);
+        }
+        
+        // Reconstruct flexv/flexh arrays from children if they exist
+        if (!node->children.empty()) {
+            if (node->type == NodeType::FlexV) {
+                sol::table flexvArray = g_lua->create_table();
+                for (size_t i = 0; i < node->children.size(); ++i) {
+                    // Convert child node to Lua table
+                    sol::table childTable = g_lua->create_table();
+                    Node* child = node->children[i];
+                    childTable["id"] = child->id;
+                    childTable["tag"] = child->tag;
+                    for (auto& [k, v] : child->properties.items()) {
+                        childTable[k] = jsonToLua(v, *g_lua);
+                    }
+                    flexvArray[i + 1] = childTable;
+                }
+                elemTable["flexv"] = flexvArray;
+            } else if (node->type == NodeType::FlexH) {
+                sol::table flexhArray = g_lua->create_table();
+                for (size_t i = 0; i < node->children.size(); ++i) {
+                    sol::table childTable = g_lua->create_table();
+                    Node* child = node->children[i];
+                    childTable["id"] = child->id;
+                    childTable["tag"] = child->tag;
+                    for (auto& [k, v] : child->properties.items()) {
+                        childTable[k] = jsonToLua(v, *g_lua);
+                    }
+                    flexhArray[i + 1] = childTable;
+                }
+                elemTable["flexh"] = flexhArray;
+            }
+        }
+        
+        return elemTable;
     });
 
-    browser.set_function("updateElem", [](int id, sol::object properties) {
+    browser.set_function("updateElem", [](int id, sol::table propertiesTable) {
         Node* node = findNodeByIdRecursive(g_document, id);
         if (!node) return;
-        node->properties = luaToJson(properties);
+        
+        // Filter out layout-related keys and convert only properties
+        nlohmann::json filteredProps = nlohmann::json::object();
+        for (const auto& kv : propertiesTable) {
+            if (kv.first.is<std::string>()) {
+                std::string key = kv.first.as<std::string>();
+                // Skip layout and special fields
+                if (key != "id" && key != "tag" && key != "x" && key != "y" && 
+                    key != "width" && key != "height" && key != "flexv" && key != "flexh") {
+                    filteredProps[key] = luaToJson(kv.second);
+                }
+            }
+        }
+        node->properties = filteredProps;
+        
+        // Handle flexv/flexh updates to rebuild children
+        if (propertiesTable["flexv"].valid()) {
+            sol::table flexvTable = propertiesTable["flexv"];
+            node->children.clear();
+            node->type = NodeType::FlexV;
+            for (const auto& childEntry : flexvTable) {
+                if (childEntry.second.is<sol::table>()) {
+                    sol::table childTable = childEntry.second.as<sol::table>();
+                    Node* newChild = new Node();
+                    newChild->id = nextNodeId();
+                    newChild->type = NodeType::FlexV;
+                    newChild->tag = childTable["tag"].get_or<std::string>("child");
+                    
+                    // Extract child properties
+                    for (const auto& kv : childTable) {
+                        if (kv.first.is<std::string>()) {
+                            std::string key = kv.first.as<std::string>();
+                            if (key != "id" && key != "tag" && key != "x" && key != "y" && 
+                                key != "width" && key != "height" && key != "flexv" && key != "flexh") {
+                                newChild->properties[key] = luaToJson(kv.second);
+                            }
+                        }
+                    }
+                    node->children.push_back(newChild);
+                }
+            }
+        } else if (propertiesTable["flexh"].valid()) {
+            sol::table flexhTable = propertiesTable["flexh"];
+            node->children.clear();
+            node->type = NodeType::FlexH;
+            for (const auto& childEntry : flexhTable) {
+                if (childEntry.second.is<sol::table>()) {
+                    sol::table childTable = childEntry.second.as<sol::table>();
+                    Node* newChild = new Node();
+                    newChild->id = nextNodeId();
+                    newChild->type = NodeType::FlexH;
+                    newChild->tag = childTable["tag"].get_or<std::string>("child");
+                    
+                    // Extract child properties
+                    for (const auto& kv : childTable) {
+                        if (kv.first.is<std::string>()) {
+                            std::string key = kv.first.as<std::string>();
+                            if (key != "id" && key != "tag" && key != "x" && key != "y" && 
+                                key != "width" && key != "height" && key != "flexv" && key != "flexh") {
+                                newChild->properties[key] = luaToJson(kv.second);
+                            }
+                        }
+                    }
+                    node->children.push_back(newChild);
+                }
+            }
+        }
     });
 
     browser.set_function("addClickHandler", [](int id, sol::function cb) {
@@ -358,6 +477,12 @@ bool initTabScripting(Tab* tab, int screenWidth, int screenHeight) {
             
             std::vector<int> ids;
             findNodesByTagRecursive(domRoot, tag, ids);
+            
+            // Fallback: if string tag not found, check semantic tag mappings
+            if (ids.empty() && tag == "main-container") {
+                findNodesByTagRecursive(domRoot, "1", ids);
+            }
+            
             sol::table result = luaState->create_table();
             for (size_t i = 0; i < ids.size(); ++i) {
                 result[i + 1] = ids[i];
@@ -368,13 +493,120 @@ bool initTabScripting(Tab* tab, int screenWidth, int screenHeight) {
         browser.set_function("getElem", [domRoot, luaState](int id) -> sol::object {
             Node* node = findNodeByIdRecursive(domRoot, id);
             if (!node) return sol::nil;
-            return jsonToLua(node->properties, *luaState);
+            
+            sol::table elemTable = luaState->create_table();
+            elemTable["id"] = node->id;
+            elemTable["tag"] = node->tag;
+            
+            // Add all properties
+            for (auto& [key, value] : node->properties.items()) {
+                elemTable[key] = jsonToLua(value, *luaState);
+            }
+            
+            // Reconstruct flexv/flexh arrays from children if they exist
+            if (!node->children.empty()) {
+                if (node->type == NodeType::FlexV) {
+                    sol::table flexvArray = luaState->create_table();
+                    for (size_t i = 0; i < node->children.size(); ++i) {
+                        sol::table childTable = luaState->create_table();
+                        Node* child = node->children[i];
+                        childTable["id"] = child->id;
+                        childTable["tag"] = child->tag;
+                        for (auto& [k, v] : child->properties.items()) {
+                            childTable[k] = jsonToLua(v, *luaState);
+                        }
+                        flexvArray[i + 1] = childTable;
+                    }
+                    elemTable["flexv"] = flexvArray;
+                } else if (node->type == NodeType::FlexH) {
+                    sol::table flexhArray = luaState->create_table();
+                    for (size_t i = 0; i < node->children.size(); ++i) {
+                        sol::table childTable = luaState->create_table();
+                        Node* child = node->children[i];
+                        childTable["id"] = child->id;
+                        childTable["tag"] = child->tag;
+                        for (auto& [k, v] : child->properties.items()) {
+                            childTable[k] = jsonToLua(v, *luaState);
+                        }
+                        flexhArray[i + 1] = childTable;
+                    }
+                    elemTable["flexh"] = flexhArray;
+                }
+            }
+            
+            return elemTable;
         });
         
-        browser.set_function("updateElem", [domRoot](int id, sol::object properties) {
+        browser.set_function("updateElem", [domRoot](int id, sol::table propertiesTable) {
             Node* node = findNodeByIdRecursive(domRoot, id);
             if (!node) return;
-            node->properties = luaToJson(properties);
+            
+            // Filter out layout-related keys and convert only properties
+            nlohmann::json filteredProps = nlohmann::json::object();
+            for (const auto& kv : propertiesTable) {
+                if (kv.first.is<std::string>()) {
+                    std::string key = kv.first.as<std::string>();
+                    // Skip layout and special fields
+                    if (key != "id" && key != "tag" && key != "x" && key != "y" && 
+                        key != "width" && key != "height" && key != "flexv" && key != "flexh") {
+                        filteredProps[key] = luaToJson(kv.second);
+                    }
+                }
+            }
+            node->properties = filteredProps;
+            
+            // Handle flexv/flexh updates to rebuild children
+            if (propertiesTable["flexv"].valid()) {
+                sol::table flexvTable = propertiesTable["flexv"];
+                node->children.clear();
+                node->type = NodeType::FlexV;
+                for (const auto& childEntry : flexvTable) {
+                    if (childEntry.second.is<sol::table>()) {
+                        sol::table childTable = childEntry.second.as<sol::table>();
+                        Node* newChild = new Node();
+                        newChild->id = nextNodeId();
+                        newChild->type = NodeType::FlexV;
+                        newChild->tag = childTable["tag"].get_or<std::string>("child");
+                        
+                        // Extract child properties
+                        for (const auto& kv : childTable) {
+                            if (kv.first.is<std::string>()) {
+                                std::string key = kv.first.as<std::string>();
+                                if (key != "id" && key != "tag" && key != "x" && key != "y" && 
+                                    key != "width" && key != "height" && key != "flexv" && key != "flexh") {
+                                    newChild->properties[key] = luaToJson(kv.second);
+                                }
+                            }
+                        }
+                        node->children.push_back(newChild);
+                    }
+                }
+            } else if (propertiesTable["flexh"].valid()) {
+                sol::table flexhTable = propertiesTable["flexh"];
+                node->children.clear();
+                node->type = NodeType::FlexH;
+                for (const auto& childEntry : flexhTable) {
+                    if (childEntry.second.is<sol::table>()) {
+                        sol::table childTable = childEntry.second.as<sol::table>();
+                        Node* newChild = new Node();
+                        newChild->id = nextNodeId();
+                        newChild->type = NodeType::FlexH;
+                        newChild->tag = childTable["tag"].get_or<std::string>("child");
+                        
+                        // Extract child properties
+                        for (const auto& kv : childTable) {
+                            if (kv.first.is<std::string>()) {
+                                std::string key = kv.first.as<std::string>();
+                                if (key != "id" && key != "tag" && key != "x" && key != "y" && 
+                                    key != "width" && key != "height" && key != "flexv" && key != "flexh") {
+                                    newChild->properties[key] = luaToJson(kv.second);
+                                }
+                            }
+                        }
+                        node->children.push_back(newChild);
+                    }
+                }
+            }
         });
         
         browser.set_function("on", [tab](int nodeId, const std::string& eventType, sol::function handler) {

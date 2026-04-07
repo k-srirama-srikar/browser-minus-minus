@@ -9,6 +9,45 @@
 // DOM Traversal Utilities (private to Tab)
 // ============================================================================
 
+static int nextNodeId() {
+    static int id = 1;
+    return id++;
+}
+
+static nlohmann::json luaToJson(const sol::object& obj) {
+    if (obj.is<bool>()) return obj.as<bool>();
+    if (obj.is<int>()) return obj.as<int>();
+    if (obj.is<float>()) return obj.as<float>();
+    if (obj.is<std::string>()) return obj.as<std::string>();
+    if (obj.is<sol::table>()) {
+        sol::table t = obj.as<sol::table>();
+        bool isArray = true;
+        int expectedKey = 1;
+        for (const auto& kv : t) {
+            if (!kv.first.is<int>() || kv.first.as<int>() != expectedKey++) {
+                isArray = false;
+                break;
+            }
+        }
+        if (isArray && !t.empty()) {
+            nlohmann::json arr = nlohmann::json::array();
+            for (const auto& kv : t) {
+                arr.push_back(luaToJson(kv.second));
+            }
+            return arr;
+        } else {
+            nlohmann::json ret = nlohmann::json::object();
+            for (const auto& kv : t) {
+                if (kv.first.is<std::string>()) {
+                    ret[kv.first.as<std::string>()] = luaToJson(kv.second);
+                }
+            }
+            return ret;
+        }
+    }
+    return nlohmann::json();
+}
+
 static Node* findNodeByIdRecursive(Node* current, int id) {
     if (!current) return nullptr;
     if (current->id == id) return current;
@@ -163,7 +202,6 @@ bool Tab::initializeLua() {
             // Copy all properties from the node's JSON
             for (auto& [key, value] : node->properties.items()) {
                 if (value.is_object()) {
-                    // Recursively convert nested objects
                     sol::table nestedTable = thisTab->luaState->create_table();
                     for (auto& [subkey, subval] : value.items()) {
                         if (subval.is_string()) {
@@ -185,6 +223,83 @@ bool Tab::initializeLua() {
                     elemTable[key] = value.get<float>();
                 } else if (value.is_boolean()) {
                     elemTable[key] = value.get<bool>();
+                }
+            }
+            
+            // Reconstruct flexv/flexh arrays from children
+            if (!node->children.empty()) {
+                if (node->type == NodeType::FlexV) {
+                    sol::table flexvArray = thisTab->luaState->create_table();
+                    for (size_t i = 0; i < node->children.size(); ++i) {
+                        sol::table childTable = thisTab->luaState->create_table();
+                        Node* child = node->children[i];
+                        childTable["id"] = child->id;
+                        childTable["tag"] = child->tag;
+                        // Add child properties
+                        for (auto& [k, v] : child->properties.items()) {
+                            if (v.is_string()) {
+                                childTable[k] = v.get<std::string>();
+                            } else if (v.is_number_integer()) {
+                                childTable[k] = v.get<int>();
+                            } else if (v.is_number_float()) {
+                                childTable[k] = v.get<float>();
+                            } else if (v.is_boolean()) {
+                                childTable[k] = v.get<bool>();
+                            } else if (v.is_object()) {
+                                sol::table nestedTable = thisTab->luaState->create_table();
+                                for (auto& [sk, sv] : v.items()) {
+                                    if (sv.is_string()) {
+                                        nestedTable[sk] = sv.get<std::string>();
+                                    } else if (sv.is_number_integer()) {
+                                        nestedTable[sk] = sv.get<int>();
+                                    } else if (sv.is_number_float()) {
+                                        nestedTable[sk] = sv.get<float>();
+                                    } else if (sv.is_boolean()) {
+                                        nestedTable[sk] = sv.get<bool>();
+                                    }
+                                }
+                                childTable[k] = nestedTable;
+                            }
+                        }
+                        flexvArray[i + 1] = childTable;
+                    }
+                    elemTable["flexv"] = flexvArray;
+                } else if (node->type == NodeType::FlexH) {
+                    sol::table flexhArray = thisTab->luaState->create_table();
+                    for (size_t i = 0; i < node->children.size(); ++i) {
+                        sol::table childTable = thisTab->luaState->create_table();
+                        Node* child = node->children[i];
+                        childTable["id"] = child->id;
+                        childTable["tag"] = child->tag;
+                        // Add child properties
+                        for (auto& [k, v] : child->properties.items()) {
+                            if (v.is_string()) {
+                                childTable[k] = v.get<std::string>();
+                            } else if (v.is_number_integer()) {
+                                childTable[k] = v.get<int>();
+                            } else if (v.is_number_float()) {
+                                childTable[k] = v.get<float>();
+                            } else if (v.is_boolean()) {
+                                childTable[k] = v.get<bool>();
+                            } else if (v.is_object()) {
+                                sol::table nestedTable = thisTab->luaState->create_table();
+                                for (auto& [sk, sv] : v.items()) {
+                                    if (sv.is_string()) {
+                                        nestedTable[sk] = sv.get<std::string>();
+                                    } else if (sv.is_number_integer()) {
+                                        nestedTable[sk] = sv.get<int>();
+                                    } else if (sv.is_number_float()) {
+                                        nestedTable[sk] = sv.get<float>();
+                                    } else if (sv.is_boolean()) {
+                                        nestedTable[sk] = sv.get<bool>();
+                                    }
+                                }
+                                childTable[k] = nestedTable;
+                            }
+                        }
+                        flexhArray[i + 1] = childTable;
+                    }
+                    elemTable["flexh"] = flexhArray;
                 }
             }
             
@@ -211,6 +326,11 @@ bool Tab::initializeLua() {
             
             std::vector<int> ids;
             findNodesByTagRecursive(thisTab->domRoot, tag, ids);
+            
+            // Fallback: if string tag not found, check semantic tag mappings
+            if (ids.empty() && tag == "main-container") {
+                findNodesByTagRecursive(thisTab->domRoot, "1", ids);
+            }
             
             sol::table result = thisTab->luaState->create_table();
             for (size_t i = 0; i < ids.size(); ++i) {
@@ -293,50 +413,76 @@ bool Tab::initializeLua() {
         });
         
         // updateElem - update element properties in the DOM tree
-        browser.set_function("updateElem", [thisTab](int id, sol::table elemTable) {
+        browser.set_function("updateElem", [thisTab](int id, sol::table propertiesTable) {
             if (!thisTab->domRoot) return;
             
             Node* node = findNodeByIdRecursive(thisTab->domRoot, id);
             if (!node) return;
             
-            // Iterate through the Lua table and update node properties
-            for (auto& [key, value] : elemTable) {
-                // Skip structural properties
-                if (key.as<std::string>() == "id" || 
-                    key.as<std::string>() == "tag" ||
-                    key.as<std::string>() == "x" ||
-                    key.as<std::string>() == "y" ||
-                    key.as<std::string>() == "width" ||
-                    key.as<std::string>() == "height") {
-                    continue;
-                }
-                
-                // Convert sol::object to JSON and store
-                if (value.is<bool>()) {
-                    node->properties[key.as<std::string>()] = value.as<bool>();
-                } else if (value.is<int>()) {
-                    node->properties[key.as<std::string>()] = value.as<int>();
-                } else if (value.is<float>()) {
-                    node->properties[key.as<std::string>()] = value.as<float>();
-                } else if (value.is<std::string>()) {
-                    node->properties[key.as<std::string>()] = value.as<std::string>();
-                } else if (value.is<sol::table>()) {
-                    // Handle nested tables (like "text" with "content" field)
-                    sol::table nestedTable = value.as<sol::table>();
-                    nlohmann::json nestedJson = nlohmann::json::object();
-                    for (auto& [subkey, subval] : nestedTable) {
-                        std::string fieldName = subkey.as<std::string>();
-                        if (subval.is<bool>()) {
-                            nestedJson[fieldName] = subval.as<bool>();
-                        } else if (subval.is<int>()) {
-                            nestedJson[fieldName] = subval.as<int>();
-                        } else if (subval.is<float>()) {
-                            nestedJson[fieldName] = subval.as<float>();
-                        } else if (subval.is<std::string>()) {
-                            nestedJson[fieldName] = subval.as<std::string>();
-                        }
+            // Filter out layout-related keys and convert only properties
+            nlohmann::json filteredProps = nlohmann::json::object();
+            for (const auto& kv : propertiesTable) {
+                if (kv.first.is<std::string>()) {
+                    std::string key = kv.first.as<std::string>();
+                    // Skip layout and special fields
+                    if (key != "id" && key != "tag" && key != "x" && key != "y" && 
+                        key != "width" && key != "height" && key != "flexv" && key != "flexh") {
+                        filteredProps[key] = luaToJson(kv.second);
                     }
-                    node->properties[key.as<std::string>()] = nestedJson;
+                }
+            }
+            node->properties = filteredProps;
+            
+            // Handle flexv/flexh updates to rebuild children
+            if (propertiesTable["flexv"].valid()) {
+                sol::table flexvTable = propertiesTable["flexv"];
+                node->children.clear();
+                node->type = NodeType::FlexV;
+                for (const auto& childEntry : flexvTable) {
+                    if (childEntry.second.is<sol::table>()) {
+                        sol::table childTable = childEntry.second.as<sol::table>();
+                        Node* newChild = new Node();
+                        newChild->id = nextNodeId();
+                        newChild->type = NodeType::FlexV;
+                        newChild->tag = childTable["tag"].get_or<std::string>("child");
+                        
+                        // Extract child properties
+                        for (const auto& kv : childTable) {
+                            if (kv.first.is<std::string>()) {
+                                std::string key = kv.first.as<std::string>();
+                                if (key != "id" && key != "tag" && key != "x" && key != "y" && 
+                                    key != "width" && key != "height" && key != "flexv" && key != "flexh") {
+                                    newChild->properties[key] = luaToJson(kv.second);
+                                }
+                            }
+                        }
+                        node->children.push_back(newChild);
+                    }
+                }
+            } else if (propertiesTable["flexh"].valid()) {
+                sol::table flexhTable = propertiesTable["flexh"];
+                node->children.clear();
+                node->type = NodeType::FlexH;
+                for (const auto& childEntry : flexhTable) {
+                    if (childEntry.second.is<sol::table>()) {
+                        sol::table childTable = childEntry.second.as<sol::table>();
+                        Node* newChild = new Node();
+                        newChild->id = nextNodeId();
+                        newChild->type = NodeType::FlexH;
+                        newChild->tag = childTable["tag"].get_or<std::string>("child");
+                        
+                        // Extract child properties
+                        for (const auto& kv : childTable) {
+                            if (kv.first.is<std::string>()) {
+                                std::string key = kv.first.as<std::string>();
+                                if (key != "id" && key != "tag" && key != "x" && key != "y" && 
+                                    key != "width" && key != "height" && key != "flexv" && key != "flexh") {
+                                    newChild->properties[key] = luaToJson(kv.second);
+                                }
+                            }
+                        }
+                        node->children.push_back(newChild);
+                    }
                 }
             }
         });
