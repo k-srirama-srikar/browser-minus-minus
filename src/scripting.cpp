@@ -3,6 +3,7 @@
 #include "dom.hpp"
 #include "network.hpp"
 #include "url_utils.hpp"
+#include "utils.hpp"
 #include <sol/sol.hpp>
 #include <iostream>
 #include <vector>
@@ -169,11 +170,15 @@ bool initScripting(Node* documentRoot) {
         sol::object arg = sol::nil;
         if (success) {
             try {
-                auto json = nlohmann::json::parse(response);
+                std::string cleaned = Utils::stripTrailingCommas(response);
+                auto json = nlohmann::json::parse(cleaned);
                 arg = jsonToLua(json, *g_lua);
-            } catch (...) {
+            } catch (const nlohmann::json::parse_error& e) {
+                // If not valid JSON even after cleaning, return as raw string
                 arg = sol::make_object(*g_lua, response);
             }
+        } else {
+            std::cerr << "[browser.fetch] Failed to fetch: " << normalized << std::endl;
         }
 
         try {
@@ -306,11 +311,15 @@ bool initTabScripting(Tab* tab, int screenWidth, int screenHeight) {
             sol::object arg = sol::nil;
             if (success) {
                 try {
-                    auto json = nlohmann::json::parse(response);
+                    std::string cleaned = Utils::stripTrailingCommas(response);
+                    auto json = nlohmann::json::parse(cleaned);
                     arg = jsonToLua(json, *luaState);
-                } catch (...) {
+                } catch (const nlohmann::json::parse_error& e) {
                     arg = sol::make_object(*luaState, response);
                 }
+            } else {
+                std::clog << "[browser.fetch] Failed to fetch: " << resolved << std::endl;
+                arg = sol::make_object(*luaState, sol::nil);
             }
             
             try {

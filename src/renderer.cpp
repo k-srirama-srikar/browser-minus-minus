@@ -9,6 +9,8 @@
 #include "tab.hpp"
 #include <SDL3_ttf/SDL_ttf.h>
 #include "url_utils.hpp"
+#include "network.hpp"
+#include "utils.hpp"
 
 #ifdef HAS_SDL3_IMAGE
 #include <SDL3_image/SDL_image.h>
@@ -89,16 +91,30 @@ static SDL_Texture* loadImageTexture(const std::string& path) {
     
 #ifdef HAS_SDL3_IMAGE
     // Use SDL_image for loading various formats
-    SDL_Surface* surface = IMG_Load(path.c_str());
-    if (surface) {
-        texture = SDL_CreateTextureFromSurface(g_renderer, surface);
-        SDL_DestroySurface(surface);
-        if (texture) {
-            g_imageCache[path] = texture;
-            // std::cout << "Image loaded: " << path << std::endl;
+    if (UrlUtils::isNetworkUrl(path)) {
+        std::string data;
+        if (fetchUrl(path, data)) {
+            SDL_IOStream* io = SDL_IOFromMem((void*)data.data(), data.size());
+            if (io) {
+                SDL_Surface* surface = IMG_Load_IO(io, true);
+                if (surface) {
+                    texture = SDL_CreateTextureFromSurface(g_renderer, surface);
+                    SDL_DestroySurface(surface);
+                    if (texture) {
+                        g_imageCache[path] = texture;
+                    }
+                }
+            }
         }
     } else {
-        // std::cerr << "Failed to load image " << path << ": " << SDL_GetError() << std::endl;
+        SDL_Surface* surface = IMG_Load(path.c_str());
+        if (surface) {
+            texture = SDL_CreateTextureFromSurface(g_renderer, surface);
+            SDL_DestroySurface(surface);
+            if (texture) {
+                g_imageCache[path] = texture;
+            }
+        }
     }
 #else
     std::cerr << "SDL3_image not available; cannot load image: " << path << std::endl;

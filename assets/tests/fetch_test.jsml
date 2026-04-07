@@ -1,0 +1,6 @@
+{
+  "lua": "fetch_test.lua",
+  "root": {
+    "text": { "content": "Fetch Test Page" }
+  }
+}

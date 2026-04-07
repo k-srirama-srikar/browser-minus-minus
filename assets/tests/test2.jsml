@@ -1,0 +1,14 @@
+{
+  "root": {
+    "flexv": [
+      {
+        "image": {
+          "url": "https://http.cat/102",
+          "alttext": "Cat Image"
+        },
+        "tag": 1,
+        "spacing": 1
+      }
+    ]
+  }
+}

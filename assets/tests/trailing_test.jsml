@@ -1,0 +1,10 @@
+{
+  "root": {
+    "flexv": [
+      {
+        "text": { "content": "Trailing Test", "fontsize": 20, },
+        "spacing": 10,
+      }
+    ],
+  }
+}

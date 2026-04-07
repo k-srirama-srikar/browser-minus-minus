@@ -1,4 +1,5 @@
 #include "dom.hpp"
+#include "utils.hpp"
 #include <iostream>
 
 using json = nlohmann::json;
@@ -55,7 +56,8 @@ static Node* parseNodeRecursive(const json& jElement) {
 
 Node* parseMarkup(const std::string& source) {
     try {
-        json j = json::parse(source, nullptr, true, true);
+        std::string cleaned = Utils::stripTrailingCommas(source);
+        json j = json::parse(cleaned, nullptr, true, true);
         
         Node* root = new Node();
         root->id = nextNodeId();

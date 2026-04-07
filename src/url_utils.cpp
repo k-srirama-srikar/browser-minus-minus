@@ -25,7 +25,26 @@ namespace UrlUtils {
         
         // If relative is already absolute or has a scheme, return it
         if (isNetworkUrl(relative)) return relative;
-        if (relative[0] == '/' || (relative.size() > 1 && relative[1] == ':')) return relative;
+        
+        // Handle absolute paths for network URLs differently
+        if (relative[0] == '/') {
+            if (isNetworkUrl(base)) {
+                // Resolve against origin (e.g. http://host:port)
+                size_t schemeEnd = base.find("://");
+                if (schemeEnd != std::string::npos) {
+                    size_t hostEnd = base.find('/', schemeEnd + 3);
+                    if (hostEnd == std::string::npos) {
+                        return base + relative;
+                    } else {
+                        return base.substr(0, hostEnd) + relative;
+                    }
+                }
+            }
+            return relative; // Fallback to original behavior for non-network bases
+        }
+        
+        // Windows-style absolute path
+        if (relative.size() > 1 && relative[1] == ':') return relative;
         
         if (base.empty()) return relative;
         
@@ -44,3 +63,4 @@ namespace UrlUtils {
         return finalBase + finalRel;
     }
 }
+

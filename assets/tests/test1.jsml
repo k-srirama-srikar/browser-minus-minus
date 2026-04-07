@@ -1,0 +1,17 @@
+{
+	"root": {
+		"flexv": [
+			{
+				"text": {
+					"content": "Hello, world!",
+					"fontsize": 14, 
+					"color": "#000000"
+				},
+				"tag" : 1,
+				"bgcolor": "#fffffff", 
+				"spacing": 1 
+			}
+		],
+		
+	}
+}

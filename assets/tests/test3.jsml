@@ -1,0 +1,24 @@
+{
+  "lua": "https://browser-testserver.vercel.app/jsml/counter.lua",
+  "root": {
+    "flexv": [
+      {
+        "text": { "content": "0", "fontsize": 32, "color": "#000000" },
+        "tag": 1, "spacing": 3
+      },
+      {
+        "flexh": [
+          {
+            "text": { "content": "- Decrement", "fontsize": 16, "color": "#cc0000" },
+            "tag": 2, "spacing": 2
+          },
+          {
+            "text": { "content": "+ Increment", "fontsize": 16, "color": "#007700" },
+            "tag": 3, "spacing": 2
+          }
+        ],
+        "tag": 4, "spacing": 1
+      }
+    ]
+  }
+}

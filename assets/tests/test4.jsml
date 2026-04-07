@@ -1,0 +1,17 @@
+{
+    "lua": "https://browser-testserver.vercel.app/jsml/task4.lua",
+    "root": {
+        "tag": 1,
+        "bgcolor": "#eeeeee",
+        "flexv": [
+            {
+                "text": {
+                    "content": "Benchmarking: Generating 100 Boxes...",
+                    "fontsize": 18,
+                    "color": "#000000"
+                },
+                "tag": 2
+            }
+        ]
+    }
+}
