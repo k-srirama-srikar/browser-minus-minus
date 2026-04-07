@@ -19,8 +19,12 @@ static Node* parseNodeRecursive(const json& jElement) {
     if (jElement.contains("tag")) {
         if (jElement["tag"].is_string()) {
             node->tag = jElement["tag"].get<std::string>();
+        } else if (jElement["tag"].is_number_integer()) {
+            // Safely handle integers by converting through long long
+            node->tag = std::to_string(jElement["tag"].get<long long>());
         } else if (jElement["tag"].is_number()) {
-            node->tag = std::to_string(jElement["tag"].get<int>());
+            // For any other numeric type, convert to string via dump
+            node->tag = jElement["tag"].dump();
         }
     }
 

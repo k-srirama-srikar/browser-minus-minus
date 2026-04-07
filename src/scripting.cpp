@@ -188,7 +188,20 @@ bool initScripting(Node* documentRoot) {
         }
     });
 
-    browser.set_function("getElemsByTag", [](const std::string& tag) {
+    browser.set_function("getElemsByTag", [](sol::object tagObj) {
+        std::string tag;
+        if (tagObj.is<std::string>()) {
+            tag = tagObj.as<std::string>();
+        } else if (tagObj.is<int>()) {
+            tag = std::to_string(tagObj.as<int>());
+        } else if (tagObj.is<long long>()) {
+            tag = std::to_string(tagObj.as<long long>());
+        } else if (tagObj.is<double>()) {
+            tag = std::to_string(static_cast<int>(tagObj.as<double>()));
+        } else if (tagObj.is<float>()) {
+            tag = std::to_string(static_cast<int>(tagObj.as<float>()));
+        }
+        
         std::vector<int> ids;
         findNodesByTagRecursive(g_document, tag, ids);
         sol::table result = g_lua->create_table();
@@ -329,7 +342,20 @@ bool initTabScripting(Tab* tab, int screenWidth, int screenHeight) {
             }
         });
         
-        browser.set_function("getElemsByTag", [domRoot, luaState](const std::string& tag) {
+        browser.set_function("getElemsByTag", [domRoot, luaState](sol::object tagObj) {
+            std::string tag;
+            if (tagObj.is<std::string>()) {
+                tag = tagObj.as<std::string>();
+            } else if (tagObj.is<int>()) {
+                tag = std::to_string(tagObj.as<int>());
+            } else if (tagObj.is<long long>()) {
+                tag = std::to_string(tagObj.as<long long>());
+            } else if (tagObj.is<double>()) {
+                tag = std::to_string(static_cast<int>(tagObj.as<double>()));
+            } else if (tagObj.is<float>()) {
+                tag = std::to_string(static_cast<int>(tagObj.as<float>()));
+            }
+            
             std::vector<int> ids;
             findNodesByTagRecursive(domRoot, tag, ids);
             sol::table result = luaState->create_table();

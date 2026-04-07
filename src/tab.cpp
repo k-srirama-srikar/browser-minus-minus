@@ -191,9 +191,22 @@ bool Tab::initializeLua() {
             return elemTable;
         });
         
-        browser.set_function("getElemsByTag", [thisTab](const std::string& tag) -> sol::object {
+        browser.set_function("getElemsByTag", [thisTab](sol::object tagObj) -> sol::object {
             if (!thisTab->domRoot) {
                 return thisTab->luaState->create_table();
+            }
+            
+            std::string tag;
+            if (tagObj.is<std::string>()) {
+                tag = tagObj.as<std::string>();
+            } else if (tagObj.is<int>()) {
+                tag = std::to_string(tagObj.as<int>());
+            } else if (tagObj.is<long long>()) {
+                tag = std::to_string(tagObj.as<long long>());
+            } else if (tagObj.is<double>()) {
+                tag = std::to_string(static_cast<int>(tagObj.as<double>()));
+            } else if (tagObj.is<float>()) {
+                tag = std::to_string(static_cast<int>(tagObj.as<float>()));
             }
             
             std::vector<int> ids;
